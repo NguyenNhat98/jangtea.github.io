@@ -18,8 +18,8 @@ const ITEMS = [
   { id: 'recipes', icon: '📖', label: 'Công thức', open: openRecipes },
   { id: 'delivery', icon: '🛵', label: 'Giao hàng', feature: 'delivery', open: openDelivery, badge: () => gameState.delivery.availableOrders.length },
   { id: 'branch', icon: '🏪', label: 'Chi nhánh', feature: 'branch', open: openBranches, badge: () => gameState.branches.length },
-  { id: 'collection', icon: '🎁', label: 'Sưu tập', open: openCollection },
   { id: 'farm', icon: '🌱', label: 'Nông trại', feature: 'farm', open: openFarm },
+  { id: 'collection', icon: '🎁', label: 'Sưu tập', open: openCollection },
 ];
 
 export function renderNav() {
