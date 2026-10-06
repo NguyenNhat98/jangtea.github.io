@@ -38,27 +38,27 @@
 
 .bottom-nav {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  padding: 6px 6px calc(6px + var(--safe-bottom));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: 4px 4px calc(4px + var(--safe-bottom));
   background: var(--c-cream);
   border-top: 2px solid var(--c-pink);
-  gap: 4px;
+  gap: 2px;
   z-index: 5;
 }
 .nav-btn {
-  min-height: 52px;
+  min-height: 48px;
   border-radius: var(--r-md);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 800;
   color: var(--c-text-soft);
   position: relative;
 }
-.nav-btn .ico { font-size: 22px; }
+.nav-btn .ico { font-size: 18px; }
 .nav-btn.active { background: var(--c-pink); color: var(--c-brown); }
 .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .nav-btn .badge { position: absolute; top: 4px; right: 10px; background: var(--c-red); color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 999px; }

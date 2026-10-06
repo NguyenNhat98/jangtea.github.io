@@ -13,8 +13,9 @@
   .scene-board small { font-size: 11px; }
   .modal-backdrop { align-items: center; }
   .modal { border-radius: var(--r-lg); margin: 16px; max-height: calc(100dvh - 60px); }
-  .nav-btn { font-size: 12px; }
-  .bottom-nav { padding: 8px 16px; }
+  .nav-btn { font-size: 10px; min-width: 0; }
+  .nav-btn .ico { font-size: 19px; }
+  .bottom-nav { grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 5px 6px; gap: 2px; }
 }
 
 @media (min-width: 1000px) {
