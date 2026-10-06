@@ -10,6 +10,7 @@ import { openBranches } from './branchUI.js';
 import { openCollection } from './collectionUI.js';
 import { closeAllModals } from './modalUI.js';
 import { toast } from './toastUI.js';
+import { openFarm } from './farmUI.js';
 
 const ITEMS = [
   { id: 'shop', icon: '🏠', label: 'Tiệm', open: () => closeAllModals() },
@@ -18,6 +19,7 @@ const ITEMS = [
   { id: 'delivery', icon: '🛵', label: 'Giao hàng', feature: 'delivery', open: openDelivery, badge: () => gameState.delivery.availableOrders.length },
   { id: 'branch', icon: '🏪', label: 'Chi nhánh', feature: 'branch', open: openBranches, badge: () => gameState.branches.length },
   { id: 'collection', icon: '🎁', label: 'Sưu tập', open: openCollection },
+  { id: 'farm', icon: '🌱', label: 'Nông trại', feature: 'farm', open: openFarm },
 ];
 
 export function renderNav() {

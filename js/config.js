@@ -3,7 +3,7 @@
  */
 export const DEBUG = true;
 export const SAVE_KEY = 'dreamTeaSave';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 export const AUTOSAVE_INTERVAL = 30;
 export const OFFLINE_MAX_SECONDS = 8 * 3600;
 export const DAYS_PER_SEASON = 7;
@@ -45,6 +45,10 @@ export const INGREDIENTS = [
   { id: 'fruit', name: 'Trái cây', icon: '🍓', cost: 5000, maxStock: 20, rarity: 'uncommon', unlockLevel: 4, desc: 'Hỗn hợp trái cây theo mùa.' },
   { id: 'honey', name: 'Mật ong', icon: '🍯', cost: 7000, maxStock: 15, rarity: 'rare', unlockLevel: 5, desc: 'Mật ong rừng nguyên chất.' },
   { id: 'rose', name: 'Hoa hồng', icon: '🌹', cost: 9000, maxStock: 10, rarity: 'epic', unlockLevel: 7, desc: 'Cánh hoa hồng sấy, thơm dịu.' },
+  { id: 'mint', name: 'Bạc hà', icon: '🌿', cost: 3500, maxStock: 20, rarity: 'uncommon', unlockLevel: 3, desc: 'Lá bạc hà mát lạnh.' },
+  { id: 'ginger', name: 'Gừng', icon: '🫚', cost: 4000, maxStock: 20, rarity: 'uncommon', unlockLevel: 4, desc: 'Vị cay ấm cho trà nóng.' },
+  { id: 'chrysanthemum', name: 'Hoa cúc', icon: '🌼', cost: 5000, maxStock: 15, rarity: 'rare', unlockLevel: 4, desc: 'Hương hoa dịu nhẹ.' },
+  { id: 'jasmine', name: 'Hoa nhài', icon: '🌼', cost: 9000, maxStock: 10, rarity: 'epic', unlockLevel: 6, desc: 'Hương thơm thanh khiết.' },
   { id: 'snowpearl', name: 'Trân châu tuyết', icon: '💎', cost: 15000, maxStock: 8, rarity: 'legendary', unlockLevel: 10, desc: 'Trân châu trong suốt như pha lê.' },
 ];
 export const INGREDIENT_MAP = Object.fromEntries(INGREDIENTS.map((i) => [i.id, i]));
@@ -128,7 +132,38 @@ export const LEVELS = [
   { xp: 12500, reward: { money: 400000 }, note: 'Huyền thoại trà' },
 ];
 export const MAX_LEVEL = LEVELS.length - 1;
-export const FEATURE_LEVELS = { delivery: 3, assistant: 4, branch: 5, franchise: 10 };
+export const FEATURE_LEVELS = { delivery: 3, farm: 3, assistant: 4, branch: 5, franchise: 10 };
+export const FARM_CONFIG = {
+  unlockLevel: 3,
+  plots: 4,
+  lands: [
+    { id: 'leftGarden', name: 'Vườn bên trái', plots: 2, cost: 30000, unlockLevel: 3, icon: '🌿' },
+    { id: 'rightGarden', name: 'Vườn bên phải', plots: 2, cost: 60000, unlockLevel: 4, icon: '🌳' },
+    { id: 'hill', name: 'Khu đồi', plots: 4, cost: 150000, unlockLevel: 5, icon: '⛰️' },
+    { id: 'pondGarden', name: 'Vườn hồ nước', plots: 4, cost: 300000, unlockLevel: 7, icon: '💧' },
+    { id: 'greenhouse', name: 'Nhà kính', plots: 6, cost: 600000, unlockLevel: 9, icon: '🏡' },
+  ],
+  buildings: {
+    coop: { name: 'Chuồng gà', icon: '🐔', cost: 80000, unlockLevel: 3 },
+    pond: { name: 'Ao nước', icon: '💧', cost: 120000, unlockLevel: 4 },
+    flowerGarden: { name: 'Vườn hoa', icon: '🌷', cost: 100000, unlockLevel: 4 },
+    beehive: { name: 'Tổ ong', icon: '🍯', cost: 180000, unlockLevel: 5 },
+  },
+  crops: {
+    tea: { name: 'Bụi trà', icon: '🍵', ingredient: 'tea', days: 3, yield: [3, 5], seedCost: 2500, sun: 1.1 },
+    lemon: { name: 'Cây chanh', icon: '🍋', ingredient: 'lemon', days: 4, yield: [2, 4], seedCost: 3000, sun: 1.05 },
+    peach: { name: 'Cây đào', icon: '🍑', ingredient: 'peach', days: 5, yield: [2, 5], seedCost: 4500, sun: 1.0 },
+    rose: { name: 'Hoa hồng', icon: '🌹', ingredient: 'rose', days: 6, yield: [1, 3], seedCost: 7000, sun: 0.95 },
+    mint: { name: 'Bạc hà', icon: '🌿', ingredient: 'mint', days: 3, yield: [2, 5], seedCost: 3500, sun: 1.1, unlockLevel: 3 },
+    ginger: { name: 'Gừng', icon: '🫚', ingredient: 'ginger', days: 4, yield: [2, 4], seedCost: 4000, sun: 1, unlockLevel: 4 },
+    chrysanthemum: { name: 'Hoa cúc', icon: '🌼', ingredient: 'chrysanthemum', days: 4, yield: [2, 4], seedCost: 5000, sun: 1, unlockLevel: 4 },
+    lychee: { name: 'Cây vải', icon: '🍒', ingredient: 'lychee', days: 5, yield: [2, 4], seedCost: 6500, sun: 1.05, unlockLevel: 5 },
+    jasmine: { name: 'Hoa nhài', icon: '🌼', ingredient: 'jasmine', days: 6, yield: [1, 3], seedCost: 9000, sun: 0.95, unlockLevel: 6 },
+  },
+  waterCost: 300,
+  fertilizerCost: 1200,
+  pesticideCost: 1500,
+};
 
 export const BUFFS = {
   karinBlessing: { id: 'karinBlessing', name: 'Phước lành Karin', icon: '🍀', duration: 30, effects: { patienceMultiplier: 1.2, moneyMultiplier: 1.1 } },

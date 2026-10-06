@@ -71,6 +71,9 @@ function normalize(state) {
   merged.stats = { ...fresh.stats, ...(state.stats || {}) };
   merged.karin = { ...fresh.karin, ...(state.karin || {}) };
   merged.settings = { ...fresh.settings, ...(state.settings || {}) };
+  merged.farm = { ...fresh.farm, ...(state.farm || {}), upgrades: { ...fresh.farm.upgrades, ...(state.farm?.upgrades || {}) }, animals: { ...fresh.farm.animals, ...(state.farm?.animals || {}) }, buildings: { ...fresh.farm.buildings, ...(state.farm?.buildings || {}) } };
+  merged.farm.plots = Array.isArray(state.farm?.plots) ? state.farm.plots.slice(0, fresh.farm.plots.length) : fresh.farm.plots;
+  while (merged.farm.plots.length < fresh.farm.plots.length) merged.farm.plots.push(null);
   merged.tutorial = { ...fresh.tutorial, ...(state.tutorial || {}) };
   merged.inventory = { ...fresh.inventory };
   for (const ing of INGREDIENTS) {

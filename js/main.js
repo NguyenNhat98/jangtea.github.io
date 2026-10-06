@@ -21,6 +21,7 @@ import { initCollectionSystem, discoverStarting } from './systems/collectionSyst
 import { initAchievementSystem, checkAchievements } from './systems/achievementSystem.js';
 import { applyOfflineProgress } from './systems/offlineSystem.js';
 import { initAudioSystem } from './systems/audioSystem.js';
+import { updateFarm } from './systems/farmSystem.js';
 
 import { initModalUI } from './ui/modalUI.js';
 import { initToastUI, toast } from './ui/toastUI.js';
@@ -36,6 +37,8 @@ import { updateBranchFrame, initBranchUI } from './ui/branchUI.js';
 import { initCollectionUI } from './ui/collectionUI.js';
 import { initAchievementUI } from './ui/achievementUI.js';
 import { initEndDayUI, openEndDay } from './ui/endDayUI.js';
+import { initFarmUI } from './ui/farmUI.js';
+import { initMainMenu } from './ui/mainMenuUI.js';
 import { openTutorial } from './ui/tutorialUI.js';
 import { floatText } from './ui/fxUI.js';
 
@@ -65,6 +68,7 @@ function registerUpdates() {
   registerUpdate(updateKarin);
   registerUpdate(updateDelivery);
   registerUpdate(updateBranches);
+  registerUpdate(updateFarm);
   registerUpdate((dt) => {
     autosaveTimer += dt;
     if (autosaveTimer >= AUTOSAVE_INTERVAL) {
@@ -148,6 +152,8 @@ function boot() {
   initCollectionUI();
   initAchievementUI();
   initEndDayUI();
+  initFarmUI();
+  initMainMenu();
   registerRenderers();
   registerUpdates();
   wireEvents();
@@ -166,8 +172,6 @@ function boot() {
     const offline = applyOfflineProgress(elapsed);
     if (!offline) toast(`Chào mừng trở lại! Ngày ${gameState.day} · ${formatMoney(gameState.money)}`, 'info', 2000);
     if (isDayFinishedOnLoad()) setTimeout(openEndDay, 400);
-  } else {
-    setTimeout(() => openTutorial(false), 400);
   }
   checkAchievements();
 }

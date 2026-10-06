@@ -1,7 +1,7 @@
 /**
  * GameState: nguồn dữ liệu duy nhất (source of truth). UI chỉ đọc từ đây.
  */
-import { SAVE_VERSION, INGREDIENTS, RECIPES, DELIVERY_CONFIG } from './config.js';
+import { SAVE_VERSION, INGREDIENTS, RECIPES, DELIVERY_CONFIG, FARM_CONFIG } from './config.js';
 
 const STARTING_INVENTORY = { tea: 10, milk: 6, sugar: 10, ice: 10, lemon: 5, peach: 4 };
 
@@ -52,6 +52,7 @@ export function createInitialState() {
     buffs: {},
     karin: { cooldown: 0, blessCount: 0 },
     achievements: {},
+    farm: { plots: Array.from({ length: FARM_CONFIG.plots }, () => null), water: 8, fertilizer: 3, pesticide: 2, lands: [], buildings: {}, animals: { butterfly: 0, dragonfly: 0, chicken: 0 }, upgrades: { greenhouse: 0, drainage: 0 } },
     stats: { totalEarned: 0, totalServed: 0, totalLeft: 0, perfectCount: 0, deliveriesDone: 0, minigamePlaysToday: 0, bestMinigameScore: 0 },
     tutorial: { done: false, step: 0 },
     settings: { sound: true, music: true },

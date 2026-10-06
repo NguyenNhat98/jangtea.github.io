@@ -8,6 +8,7 @@ import { dailyCustomerTarget } from './customerSystem.js';
 import { clearPreparations } from './recipeSystem.js';
 import { chance } from '../utils.js';
 import { saveGame } from '../save.js';
+import { advanceFarmDay } from './farmSystem.js';
 
 export function seasonForDay(day) {
   return SEASON_ORDER[Math.floor((day - 1) / DAYS_PER_SEASON) % SEASON_ORDER.length];
@@ -84,6 +85,7 @@ export function isDayFinishedOnLoad() {
 
 /** Chuyển sang ngày mới. */
 export function nextDay() {
+  advanceFarmDay();
   clearPreparations();
   gameState.shop.isOpen = false;
   gameState.day += 1;
