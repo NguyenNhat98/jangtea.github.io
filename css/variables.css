@@ -1,0 +1,40 @@
+:root {
+  --font: "Nunito", "Quicksand", "Segoe UI Rounded", "Varela Round", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  --c-bg: #fff4ea;
+  --c-cream: #fff9f2;
+  --c-pink: #ffd6e0;
+  --c-pink-deep: #ff9fb6;
+  --c-brown: #6b4a3a;
+  --c-brown-soft: #a57c66;
+  --c-green: #bfe6c8;
+  --c-green-deep: #6cc488;
+  --c-yellow: #ffe8a3;
+  --c-yellow-deep: #f8c75c;
+  --c-blue: #cfe9ff;
+  --c-red: #f36f7f;
+  --c-text: #4a352c;
+  --c-text-soft: #8a6f62;
+  --c-focus: #ff7fa3;
+  --c-card: rgba(255, 255, 255, 0.85);
+  --c-border: rgba(107, 74, 58, 0.12);
+
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --shadow-soft: 0 6px 18px rgba(107, 74, 58, 0.12);
+  --shadow-press: 0 2px 6px rgba(107, 74, 58, 0.18);
+
+  --hud-h: 64px;
+  --nav-h: 66px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --season-sky: linear-gradient(#cfe9ff, #ffe9f3);
+  --season-accent: #ffb7c9;
+}
+
+[data-season="spring"] { --season-sky: linear-gradient(#cfe9ff, #ffe9f3); --season-accent: #ffb7c9; }
+[data-season="summer"] { --season-sky: linear-gradient(#bfe3ff, #fff3b0); --season-accent: #f8c75c; }
+[data-season="autumn"] { --season-sky: linear-gradient(#ffd9b0, #ffe9d6); --season-accent: #f0a35e; }
+[data-season="winter"] { --season-sky: linear-gradient(#dfe9f5, #f6f9ff); --season-accent: #9fc4e8; }
