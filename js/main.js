@@ -61,6 +61,14 @@ function registerRenderers() {
 }
 
 let autosaveTimer = 0;
+let lastErrorNoticeAt = 0;
+function showFriendlyErrorNotice() {
+  const now = Date.now();
+  if (now - lastErrorNoticeAt < 5000) return;
+  lastErrorNoticeAt = now;
+  toast('Ôi, trò chơi vừa gặp trục trặc nhỏ. Bạn thử lại thao tác nhé.', 'error', 5000);
+}
+
 function registerUpdates() {
   registerUpdate(updateBuffs);
   registerUpdate(updateCustomerSystem);
@@ -111,8 +119,14 @@ function wireEvents() {
 
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
   window.addEventListener('beforeunload', () => saveGame());
-  window.addEventListener('error', (e) => console.error('[Game] Lỗi không bắt được:', e.error || e.message));
-  window.addEventListener('unhandledrejection', (e) => console.error('[Game] Promise lỗi:', e.reason));
+  window.addEventListener('error', (e) => {
+    console.error('[Game] Lỗi không bắt được:', e.error || e.message);
+    showFriendlyErrorNotice();
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('[Game] Promise lỗi:', e.reason);
+    showFriendlyErrorNotice();
+  });
 }
 
 function exposeDebug() {

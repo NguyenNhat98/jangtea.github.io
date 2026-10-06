@@ -1,0 +1,57 @@
+﻿/* Farm field: soil plots are the primary planting controls. */
+.farm-root { min-width: 0; }
+.farm-screen { display: flex; flex-direction: column; gap: 14px; color: #59473a; }
+.farm-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.farm-header h2, .farm-panel-heading h3 { margin: 2px 0 0; color: #513c2d; }
+.farm-eyebrow { color: #8a9b62; font-size: 10px; font-weight: 900; letter-spacing: .13em; }
+.farm-weather { padding: 8px 11px; border-radius: 999px; background: #eef5e6; font-size: 13px; font-weight: 800; white-space: nowrap; }
+.farm-weather span { margin-left: 4px; color: #8a806e; font-weight: 600; }
+.farm-supplies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.farm-supplies > span { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 6px; padding: 9px 11px; border: 1px solid #eee4d6; border-radius: 13px; background: #fffdf9; font-size: 17px; }
+.farm-supplies b { font-size: 15px; }
+.farm-supplies small { grid-column: 2; color: #908475; font-size: 10px; }
+.farm-hint { margin: 0; color: #8b7e70; font-size: 12px; }
+.farm-field { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; padding: 12px; border: 1px solid #d7dfb3; border-radius: 18px; background: linear-gradient(135deg, #e9f0d0, #f2edcf 45%, #e3edce); box-shadow: inset 0 1px 8px #77874a18; }
+.farm-plot { position: relative; display: flex; min-width: 0; min-height: 112px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; overflow: hidden; padding: 8px 4px; border: 2px solid #bd9465; border-radius: 14px; background: repeating-linear-gradient(0deg, #bc8d5d, #bc8d5d 5px, #c99b68 5px, #c99b68 10px); color: #fff8e9; box-shadow: inset 0 2px 5px #754d3540, 0 2px 3px #70503320; cursor: pointer; transition: transform .16s, border-color .16s, box-shadow .16s; }
+.farm-plot:hover { transform: translateY(-2px); border-color: #8b6848; }
+.farm-plot.is-selected { border-color: #6f9c52; box-shadow: 0 0 0 3px #c9dda4, inset 0 2px 5px #754d3540; }
+.farm-plot-empty { color: #fff8e9; }
+.farm-soil { display: grid; width: 30px; height: 30px; place-items: center; border: 1px dashed #f4dfb4aa; border-radius: 50%; color: #fff7dd; font-size: 24px; line-height: 1; }
+.farm-plot-grown { background: repeating-linear-gradient(0deg, #a97b50, #a97b50 5px, #b98a5b 5px, #b98a5b 10px); }
+.farm-crop-icon { min-height: 42px; filter: drop-shadow(0 2px 1px #533b2c55); font-size: 34px; line-height: 1.2; }
+.farm-plot-grown:not(.is-ready) .farm-crop-icon { transform: scale(.8); }
+.farm-plot-grown.is-ready .farm-crop-icon { transform: scale(1.12); }
+.farm-crop-name { max-width: 100%; overflow: hidden; color: #fff; font-size: 11px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 3px #49301f; }
+.farm-growth { width: 76%; height: 4px; overflow: hidden; border-radius: 99px; background: #fff8e880; }
+.farm-growth i, .farm-status-bar i { display: block; height: 100%; border-radius: inherit; background: #8dcc66; }
+.farm-plot-meta { color: #fff8e9; font-size: 9px; font-weight: 700; text-shadow: 0 1px 2px #49301f; }
+.farm-selection, .farm-expansion { padding: 13px; border: 1px solid #eee4d6; border-radius: 16px; background: #fffdf9; }
+.farm-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.farm-panel-heading h3 { font-size: 16px; }
+.farm-close-selection { width: 32px; height: 32px; border: 0; border-radius: 50%; background: #f4eee5; color: #766454; font-size: 22px; cursor: pointer; }
+.farm-seeds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.farm-seed { display: flex; min-width: 0; min-height: 84px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 7px 4px; border: 1px solid #eadfce; border-radius: 12px; background: #fff; color: #59473a; cursor: pointer; }
+.farm-seed:hover:not(:disabled) { border-color: #95ae6a; background: #f6f9ed; }
+.farm-seed:disabled { opacity: .48; cursor: not-allowed; }
+.farm-seed-icon { font-size: 24px; }
+.farm-seed-name { font-size: 11px; font-weight: 800; }
+.farm-seed small { color: #968878; font-size: 9px; text-align: center; }
+.farm-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.farm-actions .btn { min-width: 0; padding: 8px 4px; font-size: 11px; }
+.farm-status { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: #827565; font-size: 11px; }
+.farm-status-bar { width: 54px; height: 5px; overflow: hidden; border-radius: 99px; background: #e8e2d7; }
+.farm-status-bar i { background: #67b8d0; }
+.farm-expansion h4 { margin: 14px 0 7px; color: #776858; font-size: 12px; }
+.farm-upgrade-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.farm-upgrade { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 7px; padding: 8px 10px; border: 1px solid #eadfce; border-radius: 11px; background: #fff; color: #59473a; text-align: left; cursor: pointer; }
+.farm-upgrade > span { grid-row: span 2; font-size: 20px; }
+.farm-upgrade b { font-size: 11px; }
+.farm-upgrade small { color: #928373; font-size: 9px; }
+.farm-upgrade:disabled { opacity: .45; cursor: not-allowed; }
+.farm-notice { position: fixed; z-index: 100; top: 18px; left: 50%; max-width: calc(100vw - 32px); transform: translateX(-50%); padding: 11px 16px; border: 1px solid #f0d6aa; border-radius: 14px; background: #fffaf0; color: #725438; box-shadow: 0 8px 24px #59473a30; font-weight: 800; font-size: 13px; animation: toastIn 250ms ease both; }
+@media (max-width: 520px) {
+  .farm-field { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; padding: 9px; }
+  .farm-plot { min-height: 98px; }
+  .farm-seeds { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .farm-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

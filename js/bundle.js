@@ -1802,7 +1802,9 @@
   function toast(message, type = "info", duration = 2200) {
     const root2 = document.getElementById("toastRoot");
     if (!root2) return;
-    const el = html(`<div class="toast ${type}" role="status">${esc(message)}</div>`);
+    const icon = { info: "💡", success: "🌿", error: "🌸", gold: "✨" }[type] || "💬";
+    const role = type === "error" ? "alert" : "status";
+    const el = html(`<div class="toast ${type}" role="${role}"><span class="toast-icon" aria-hidden="true">${icon}</span><span>${esc(message)}</span></div>`);
     root2.appendChild(el);
     while (root2.children.length > 4) root2.firstElementChild.remove();
     setTimeout(() => {
@@ -2988,8 +2990,21 @@
       if (document.hidden) saveGame();
     });
     window.addEventListener("beforeunload", () => saveGame());
-    window.addEventListener("error", (e) => console.error("[Game] L\u1ED7i kh\xF4ng b\u1EAFt \u0111\u01B0\u1EE3c:", e.error || e.message));
-    window.addEventListener("unhandledrejection", (e) => console.error("[Game] Promise l\u1ED7i:", e.reason));
+    let lastErrorNoticeAt = 0;
+    const showFriendlyErrorNotice = () => {
+      const now = Date.now();
+      if (now - lastErrorNoticeAt < 5e3) return;
+      lastErrorNoticeAt = now;
+      toast("Ôi, trò chơi vừa gặp trục trặc nhỏ. Bạn thử lại thao tác nhé.", "error", 5e3);
+    };
+    window.addEventListener("error", (e) => {
+      console.error("[Game] Lỗi không bắt được:", e.error || e.message);
+      showFriendlyErrorNotice();
+    });
+    window.addEventListener("unhandledrejection", (e) => {
+      console.error("[Game] Promise lỗi:", e.reason);
+      showFriendlyErrorNotice();
+    });
   }
   function exposeDebug() {
     if (!DEBUG) return;

@@ -84,6 +84,9 @@
 .rarity-legendary .rarity { color: #d1960c; }
 
 .toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: var(--c-brown);
   color: #fff;
   padding: 10px 16px;
@@ -94,7 +97,8 @@
   animation: toastIn 250ms ease both;
 }
 .toast.success { background: var(--c-green-deep); }
-.toast.error { background: var(--c-red); }
+.toast-icon { flex: 0 0 auto; font-size: 18px; }
+.toast.error { background: #fff5f2; color: #7d3f3b; border: 1px solid #f0c8c1; }
 .toast.gold { background: var(--c-yellow-deep); color: var(--c-brown); }
 .toast.out { animation: toastOut 250ms ease both; }
 

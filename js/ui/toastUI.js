@@ -9,7 +9,9 @@ import { on, EVENTS } from '../events.js';
 export function toast(message, type = 'info', duration = 2200) {
   const root = document.getElementById('toastRoot');
   if (!root) return;
-  const el = html(`<div class="toast ${type}" role="status">${esc(message)}</div>`);
+  const icon = { info: '💡', success: '🌿', error: '🌸', gold: '✨' }[type] || '💬';
+  const role = type === 'error' ? 'alert' : 'status';
+  const el = html(`<div class="toast ${type}" role="${role}"><span class="toast-icon" aria-hidden="true">${icon}</span><span>${esc(message)}</span></div>`);
   root.appendChild(el);
   while (root.children.length > 4) root.firstElementChild.remove();
   setTimeout(() => {

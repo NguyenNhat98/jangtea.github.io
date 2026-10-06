@@ -1,17 +1,14 @@
-# 🧋 Tiệm Trà Mơ Ước
+﻿# Tiệm Trà Mơ Ước
 
-Game quản lý tiệm trà cozy, mobile-first, thuần HTML/CSS/JS, không backend.
+Game quản lý tiệm trà cozy, chạy dưới dạng website tĩnh, không cần backend hoặc bước build.
 
-## Chơi
+## Chơi và triển khai
 
-Mở `index.html` bằng trình duyệt. Không cần server.
+GitHub Pages tải trực tiếp các ES module trong `js/`, bao gồm toàn bộ hệ thống nông trại. Khi mở `index.html` bằng `file://`, trang tự dùng `js/bundle.js` để tương thích với trình duyệt chặn module trên file cục bộ; chế độ này có giao diện nông trại cơ bản. Không cần cài Node.js.
 
 ## Sửa code
 
-Mã nguồn dạng ES modules nằm trong `js/`. Trình duyệt chặn module khi mở qua `file://`, nên `index.html` nạp bản gộp `js/bundle.js`.
-Sau khi sửa bất kỳ file nào trong `js/`, chạy `build.bat` (cần Node.js) để gộp lại.
-
-Muốn chạy thẳng từ module (không cần build) thì phục vụ thư mục qua một static server bất kỳ và đổi thẻ script trong `index.html` thành `<script type="module" src="js/main.js"></script>`.
+Mã nguồn chính nằm trong `js/`. Sau khi sửa, tải lại trang. GitHub Pages dùng `js/main.js`; chế độ mở file dùng bundle tương thích đã có sẵn.
 
 ## Debug
 
@@ -19,11 +16,11 @@ Muốn chạy thẳng từ module (không cần build) thì phục vụ thư m�
 
 ## Cấu trúc
 
-- `js/config.js`: toàn bộ dữ liệu balance (công thức, nguyên liệu, mùa, thời tiết, nâng cấp, level, buff, chi nhánh, thành tựu).
-- `js/state.js`: GameState (source of truth) + dirty flags cho render.
+- `js/config.js`: dữ liệu balance và cấu hình game.
+- `js/state.js`: trạng thái game và dirty flags cho render.
 - `js/events.js`: event bus.
-- `js/gameLoop.js`: requestAnimationFrame, chỉ render phần dirty.
-- `js/save.js`: LocalStorage key `dreamTeaSave`, migration, memory-only fallback.
-- `js/systems/`: logic (khách, order, công thức, kho, kinh tế, Karin, buff, thời tiết, lịch, giao hàng, chi nhánh, sưu tập, thành tựu, offline, âm thanh).
-- `js/ui/`: DOM render từng khu vực + modal.
-- `js/minigames/pearlGame.js`: Ô Ăn Quan Trân Châu.
+- `js/gameLoop.js`: vòng lặp game và render.
+- `js/save.js`: lưu LocalStorage, migration và memory-only fallback.
+- `js/systems/`: logic gameplay, bao gồm nông trại.
+- `js/ui/`: giao diện DOM cho từng khu vực và modal.
+- `js/minigames/pearlGame.js`: minigame Ô Ăn Quan Trân Châu.
