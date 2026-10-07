@@ -2,7 +2,7 @@
 import { gameState } from '../state.js';
 import { RECIPE_MAP } from '../config.js';
 import { html, esc, formatMoney, formatTime } from '../utils.js';
-import { acceptOrder, freeVehicles, destinationOf } from '../systems/deliverySystem.js';
+import { acceptOrder, dispatchPreparedOrder, freeVehicles, destinationOf } from '../systems/deliverySystem.js';
 import { openModal } from './modalUI.js';
 import { toast } from './toastUI.js';
 import { playSfx } from '../systems/audioSystem.js';
@@ -34,8 +34,18 @@ function render(body) {
           <button class="btn btn-sm btn-warm" data-accept="${o.id}" ${freeVehicles() <= 0 ? 'disabled' : ''} aria-label="Nhận đơn">${formatMoney(o.reward)}</button></div>`;
       }).join('')
     : `<p class="muted center">${gameState.shop.dayStarted ? 'Hết đơn hôm nay. Mở cửa ngày mai để nhận thêm!' : 'Mở cửa tiệm để nhận đơn giao hàng 🛵'}</p>`;
+  const prepared = (d.preparedOrders || []).length
+    ? d.preparedOrders.map((o) => {
+        const dest = destinationOf(o);
+        const recipe = RECIPE_MAP[o.recipeId];
+        return `<div class="upgrade-row prepared-delivery"><span class="ico">${recipe?.icon || '🥤'}</span>
+          <div class="grow"><div class="bold">${esc(dest.name)}</div><div class="muted">${esc(o.customer)} · ${esc(recipe?.name || '')} · Cỡ ${o.cupSize || 'M'}</div></div>
+          <button class="btn btn-sm btn-primary" data-dispatch="${o.id}" ${freeVehicles() <= 0 ? 'disabled' : ''}>🛵 Giao · ${formatMoney(o.reward)}</button></div>`;
+      }).join('')
+    : '<p class="muted center">Chưa có đơn online đã pha xong.</p>';
   body.innerHTML = `${map}
     <div class="row between"><span class="bold">🛵 Xe rảnh: ${freeVehicles()}/${d.vehicles}</span><span class="muted">Đã giao: ${gameState.stats.deliveriesDone}</span></div>
+    <h3>📦 Đơn đã đóng nắp · Sẵn sàng giao</h3>${prepared}
     <h3>Đang giao</h3>${active}
     <h3>Đơn chờ nhận</h3>${avail}`;
   for (const btn of body.querySelectorAll('[data-accept]')) {
@@ -49,6 +59,13 @@ function render(body) {
         toast('Xe đã xuất phát! 🛵', 'success');
         render(body);
       }
+    });
+  }
+  for (const btn of body.querySelectorAll('[data-dispatch]')) {
+    btn.addEventListener('click', () => {
+      const err = dispatchPreparedOrder(Number(btn.dataset.dispatch));
+      if (err) { toast(err, 'error'); playSfx('error'); }
+      else { playSfx('success'); toast('Tài xế đã nhận đơn và lên đường! 🛵', 'success'); render(body); }
     });
   }
 }

@@ -67,6 +67,9 @@ function normalize(state) {
   merged.shop = { ...fresh.shop, ...(state.shop || {}) };
   merged.upgrades = { ...fresh.upgrades, ...(state.upgrades || {}) };
   merged.delivery = { ...fresh.delivery, ...(state.delivery || {}) };
+  merged.delivery.preparedOrders = Array.isArray(state.delivery?.preparedOrders) ? state.delivery.preparedOrders : [];
+  merged.delivery.activeOrders = Array.isArray(state.delivery?.activeOrders) ? state.delivery.activeOrders : [];
+  merged.delivery.availableOrders = Array.isArray(state.delivery?.availableOrders) ? state.delivery.availableOrders : [];
   merged.collection = { ingredients: {}, recipes: {}, ...(state.collection || {}) };
   merged.stats = { ...fresh.stats, ...(state.stats || {}) };
   merged.karin = { ...fresh.karin, ...(state.karin || {}) };

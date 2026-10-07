@@ -15,7 +15,7 @@
 
 .customer-area {
   position: relative; z-index: 1;
-  display: flex; gap: 8px; padding: 8px 10px; align-items: flex-end; overflow-x: auto; min-height: 150px;
+  display: flex; gap: 8px; padding: 8px 10px; align-items: flex-end; overflow-x: auto; min-height: 110px;
   scrollbar-width: none;
 }
 .customer-area::-webkit-scrollbar { display: none; }
@@ -35,6 +35,7 @@
 .customer.mood-impatient .avatar { animation: wiggle 700ms ease-in-out infinite; }
 .customer.mood-angry .avatar { filter: hue-rotate(-20deg) saturate(1.4); animation: wiggle 350ms ease-in-out infinite; }
 .customer .cname { font-size: 12px; font-weight: 800; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.online-customer-tag { border-radius: 999px; padding: 2px 6px; background: #e6efff; color: #466591; font-size: 9px; font-weight: 900; }
 .customer .bubble { background: var(--c-cream); border-radius: 10px; padding: 3px 6px; font-size: 11px; font-weight: 700; line-height: 1.2; }
 .customer .bubble .ico { font-size: 18px; display: block; }
 .customer .bubble .req { color: var(--c-red); font-size: 10px; display: block; }
@@ -46,7 +47,7 @@
 .counter {
   position: relative; z-index: 1; margin: 0 10px 6px; padding: 10px;
   background: linear-gradient(#f7dcc4, #e7c3a2); border-radius: var(--r-lg); box-shadow: var(--shadow-soft);
-  min-height: 118px; border: 3px solid #fff;
+  min-height: 118px; max-height: 52vh; overflow-y: auto; overscroll-behavior: contain; border: 3px solid #fff;
 }
 .counter-title { font-size: 12px; font-weight: 800; color: var(--c-brown-soft); margin-bottom: 4px; display: flex; justify-content: space-between; }
 .counter-idle { text-align: center; color: var(--c-brown-soft); font-weight: 700; padding: 14px; }
@@ -64,6 +65,70 @@
 .timing-label { font-size: 12px; font-weight: 800; text-align: center; color: var(--c-brown); }
 .assistant-slot { margin-top: 8px; padding: 6px 10px; background: rgba(255,255,255,0.6); border-radius: var(--r-md); font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .assistant-slot .bar { flex: 1; height: 8px; }
+
+/* Compact, always-visible drink builder inspired by a cozy counter POS. */
+.barista-station { display: flex; flex-direction: column; gap: 8px; }
+.station-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.station-heading > div { display: flex; flex-direction: column; gap: 2px; }
+.station-kicker, .station-label { color: #967453; font-size: 9px; font-weight: 900; letter-spacing: .12em; }
+.station-heading b { color: #624b38; font-size: 13px; }
+.station-status { border-radius: 999px; padding: 5px 8px; background: #fff8e8; color: #80633d; font-size: 10px; font-weight: 800; }
+.tea-menu { display: flex; gap: 6px; overflow-x: auto; padding: 1px 1px 5px; scrollbar-width: thin; }
+.tea-choice { flex: 0 0 72px; display: flex; min-height: 62px; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 5px; border: 1px solid #e5d7c7; border-radius: 11px; background: #fffaf2; color: #6a543f; cursor: pointer; }
+.tea-choice > span { font-size: 21px; line-height: 1; }
+.tea-choice b { width: 100%; overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.tea-choice.active { border: 2px solid #7fa56a; background: #eff7e9; box-shadow: 0 2px 6px #687e4933; }
+.tea-choice:disabled { opacity: .55; cursor: default; }
+.station-options { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 10px; }
+.size-picker, .topping-picker { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.size-picker { min-width: 132px; }
+.size-picker > .station-label, .topping-picker > .station-label { display: block; }
+.cup-size { display: flex; align-items: center; gap: 4px; padding: 4px 6px; border: 1px solid #e7d8c8; border-radius: 9px; background: #fffaf2; color: #6a543f; cursor: pointer; }
+.cup-size b { display: grid; width: 23px; height: 23px; place-items: center; border-radius: 7px; background: #f1e4d4; font-size: 10px; }
+.cup-size span, .cup-size small { font-size: 9px; }
+.cup-size.active { border-color: #7fa56a; background: #eff7e9; }
+.cup-size:disabled { opacity: .6; }
+.topping-list { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 3px; }
+.topping-choice { flex: 0 0 47px; display: flex; height: 47px; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #e7d8c8; border-radius: 9px; background: #fffaf2; color: #6a543f; cursor: pointer; }
+.topping-choice > span { font-size: 17px; line-height: 1; }
+.topping-choice b { max-width: 44px; overflow: hidden; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.topping-choice small { font-size: 7px; }
+.topping-choice.active { border: 2px solid #deaa65; background: #fff0d5; }
+.topping-choice:disabled { opacity: .4; cursor: not-allowed; }
+.brew-bench { display: flex; min-height: 76px; align-items: center; gap: 12px; padding: 7px 10px; border: 1px solid #e4cba9; border-radius: 13px; background: linear-gradient(135deg, #fff4dc, #f4dfbe); }
+.cup-stage { position: relative; display: grid; width: 52px; height: 60px; flex: 0 0 52px; place-items: end center; }
+.cup-glass { position: relative; display: flex; width: 38px; height: 47px; align-items: center; justify-content: center; overflow: hidden; border: 2px solid #fff; border-radius: 5px 5px 12px 12px; background: #ffffffaa; box-shadow: 0 2px 4px #755d3b30; }
+.cup-liquid { position: absolute; right: 0; bottom: 0; left: 0; min-height: 3px; background: linear-gradient(#c98b49, #a65c32); transition: height .15s linear; }
+.cup-ready .cup-liquid { background: linear-gradient(#d79a55, #a94f37); }
+.cup-ingredients { position: relative; z-index: 1; font-size: 9px; letter-spacing: -3px; text-shadow: 0 1px #fff; }
+.cup-size-label { position: absolute; right: 1px; bottom: 1px; z-index: 2; padding: 1px 2px; border-radius: 3px; background: #fff; color: #765c40; font-size: 7px; font-weight: 900; }
+.cup-lid { position: absolute; top: 2px; z-index: 3; color: #eee; font-size: 19px; opacity: 0; transform: translateY(-14px); }
+.cup-stage.sealing .cup-lid, .cup-stage.cup-ready .cup-lid { opacity: 1; transform: translateY(0); }
+.cup-stage.sealing .cup-lid { animation: lidSeal .4s cubic-bezier(.2,1.5,.5,1) both; }
+.pour-stream { position: absolute; top: 0; left: 16px; color: #a96d3d; font-size: 17px; opacity: 0; }
+.cup-stage.pouring .pour-stream { animation: teaPour .7s ease-in-out infinite; }
+.cup-stage.pouring .cup-glass { animation: cupFill .9s ease-in-out infinite alternate; }
+.cup-build-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.cup-build-copy b { color: #664d36; font-size: 11px; }
+.cup-build-copy small { color: #826f5c; font-size: 9px; line-height: 1.4; }
+.cup-build-copy .ing-chip { padding: 1px 4px; font-size: 8px; }
+.station-ticket { display: flex; flex-direction: column; gap: 2px; padding: 6px 9px; border-left: 3px solid #caa778; border-radius: 7px; background: #fffaf1; }
+.station-ticket > span { color: #9a7953; font-size: 8px; font-weight: 900; letter-spacing: .1em; }
+.station-ticket b { color: #604b38; font-size: 10px; }
+.station-ticket small { color: #927d66; font-size: 9px; }
+.station-ticket.online-ticket { border-left-color: #789ed2; background: #f2f7ff; }
+.prepared-delivery { border: 1px solid #c9d9f2; border-radius: 12px; background: #f5f8ff; padding: 9px; }
+.station-warning { margin: 0; color: #9a5b3c; font-size: 10px; font-weight: 800; }
+.station-controls { display: flex; align-items: center; gap: 7px; }
+.station-controls .bar { flex: 1; height: 11px; }
+.seal-button { box-shadow: 0 3px 0 #bc7650; }
+.handoff-flash { animation: handoffFlash .55s ease; }
+@keyframes teaPour { 0%, 100% { opacity: 0; transform: translateY(-2px) scaleY(.5); } 45%, 65% { opacity: .9; transform: translateY(12px) scaleY(1); } }
+@keyframes cupFill { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+@keyframes lidSeal { 0% { transform: translateY(-16px) scale(1.2); } 70% { transform: translateY(3px); } 100% { transform: translateY(0) scale(1); } }
+@keyframes handoffFlash { 40% { filter: brightness(1.12); transform: translateX(3px); } }
+@media (max-width: 420px) { .station-options { grid-template-columns: 1fr; gap: 6px; } .size-picker { min-width: 0; flex-direction: row; flex-wrap: wrap; align-items: center; } .size-picker > .station-label { width: 100%; } .cup-size { flex: 1; justify-content: center; } }
+@media (max-height: 760px) { .customer-area { min-height: 112px; } .customer { padding: 6px; gap: 2px; } .customer .avatar { font-size: 30px; } .counter { padding: 7px; } .barista-station { gap: 6px; } .brew-bench { min-height: 66px; } }
 
 .karin-area { position: absolute; right: 14px; top: 112px; z-index: 2; }
 .scene-board {

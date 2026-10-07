@@ -25,6 +25,7 @@ export function renderCustomers() {
       const mood = moodOf(c);
       const req = c.order?.specialRequest ? `<span class="req">${esc(specialRequestName(c.order.specialRequest))}</span>` : '';
       const qty = c.order?.quantity > 1 ? ` ×${c.order.quantity}` : '';
+      const size = c.order?.cupSize ? ` · ${c.order.cupSize}` : '';
       const selected = shop.selectedCustomerId === c.id ? 'selected' : '';
       const byAssistant = c.handledBy === 'assistant' ? '<span class="small">👩‍🍳 trợ lý</span>' : '';
       return `
@@ -33,7 +34,8 @@ export function renderCustomers() {
         <span class="mood" data-mood>${MOOD_ICON[mood] || ''}</span>
         <span class="avatar">${c.avatar}</span>
         <span class="cname">${esc(c.name)}</span>
-        <span class="bubble"><span class="ico">${recipe?.icon || '❓'}</span>${esc(recipe?.name || '???')}${qty}${req}</span>
+        ${c.order?.channel === 'online' ? '<span class="online-customer-tag">📱 Đơn online</span>' : ''}
+        <span class="bubble"><span class="ico">${recipe?.icon || '❓'}</span>${esc(recipe?.name || '???')}${size}${qty}${req}</span>
         ${byAssistant}
         <span class="bar" data-bar><span style="width:${((c.patience / c.maxPatience) * 100).toFixed(0)}%"></span></span>
       </button>`;

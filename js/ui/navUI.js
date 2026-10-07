@@ -16,7 +16,7 @@ const ITEMS = [
   { id: 'shop', icon: '🏠', label: 'Tiệm', open: () => closeAllModals() },
   { id: 'inventory', icon: '📦', label: 'Kho', open: openInventory },
   { id: 'recipes', icon: '📖', label: 'Công thức', open: openRecipes },
-  { id: 'delivery', icon: '🛵', label: 'Giao hàng', feature: 'delivery', open: openDelivery, badge: () => gameState.delivery.availableOrders.length },
+  { id: 'delivery', icon: '🛵', label: 'Giao hàng', feature: 'delivery', open: openDelivery, badge: () => gameState.delivery.availableOrders.length + (gameState.delivery.preparedOrders?.length || 0) },
   { id: 'branch', icon: '🏪', label: 'Chi nhánh', feature: 'branch', open: openBranches, badge: () => gameState.branches.length },
   { id: 'farm', icon: '🌱', label: 'Nông trại', feature: 'farm', open: openFarm },
   { id: 'collection', icon: '🎁', label: 'Sưu tập', open: openCollection },

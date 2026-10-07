@@ -70,6 +70,9 @@ const SFX = {
   sparkle: () => { [1568, 1975, 2349].forEach((f, i) => tone(f, 0.1, 'sine', 0.5, i * 0.05)); },
   pop: () => tone(440, 0.06, 'square', 0.3),
   sad: () => { tone(392, 0.15, 'sine'); tone(311, 0.3, 'sine', 1, 0.14); },
+  pour: () => { tone(330, 0.24, 'sine', 0.45); tone(392, 0.28, 'sine', 0.35, 0.12); tone(494, 0.2, 'triangle', 0.25, 0.3); },
+  lid: () => { tone(540, 0.07, 'triangle', 0.55); tone(820, 0.12, 'sine', 0.5, 0.07); },
+  handoff: () => { tone(659, 0.1, 'triangle'); tone(784, 0.12, 'triangle', 0.7, 0.1); tone(988, 0.18, 'sine', 0.7, 0.21); },
 };
 
 /** Phát hiệu ứng theo tên. */

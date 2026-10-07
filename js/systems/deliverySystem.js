@@ -54,6 +54,24 @@ export function acceptOrder(orderId) {
   return null;
 }
 
+/** Accept an online order that has already been brewed and sealed. */
+export function dispatchPreparedOrder(orderId) {
+  const d = gameState.delivery;
+  d.preparedOrders ||= [];
+  const idx = d.preparedOrders.findIndex((order) => order.id === orderId);
+  if (idx < 0) return 'Đơn giao hàng không còn';
+  if (freeVehicles() <= 0) return 'Không còn tài xế trống';
+  const [order] = d.preparedOrders.splice(idx, 1);
+  order.status = 'delivering';
+  order.progress = 0;
+  order.startedAt = Date.now();
+  d.activeOrders.push(order);
+  emit(EVENTS.DELIVERY_STARTED, order);
+  markDirty('nav');
+  requestSave();
+  return null;
+}
+
 function completeOrder(order) {
   order.status = 'completed';
   const reward = Math.round(order.reward * getMultiplier('deliveryMultiplier'));

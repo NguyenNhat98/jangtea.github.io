@@ -1,0 +1,126 @@
+/* The guest counter: warm paper, striped awning and a compact wooden worktop. */
+.app { max-width: 760px; background: #faf1d6; }
+.app > .hud, .app > .shop, .app > .bottom-nav { min-width: 0; width: 100%; }
+.shop { display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: thin; background: #faf1d6; padding-top: 40px; }
+.shop::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 29px; z-index: 3; pointer-events: none; background: repeating-linear-gradient(90deg, #d8918c 0 34px, #fff5df 34px 68px); border-top: 7px solid #edb4aa; border-bottom: 2px solid #826753; border-radius: 0 0 17px 17px; box-shadow: 0 4px 0 #8a6c4920; }
+.shop::after { content: ''; display: block; flex: 1 0 85px; min-height: 85px; margin: 24px 7px 0; border: 2px solid #896d52; background: linear-gradient(#b79672 0 7px, #d5b48b 7px 13px, #b69572 13px calc(100% - 18px), #dac39d calc(100% - 18px)); box-shadow: inset 0 0 0 4px #ddc69d; }
+.scene-wall { background: #f6e9cc; bottom: 0; }
+.scene-window, .scene-shelf, .scene-board, .scene-plant, .scene-cat, .scene-floor { display: none; }
+.customer-area { flex: 0 0 auto; min-height: 42px; padding: 0 10px 3px; gap: 8px; align-items: center; overflow-y: hidden; }
+.customer { flex: 0 0 39px; width: 39px; height: 39px; min-height: 0; padding: 3px; border: 2px solid #c1b293; border-radius: 50%; background: #fcf5e6; box-shadow: 0 2px 0 #8f745633; gap: 0; }
+.customer.selected { border-color: #769570; background: #e8efd5; }
+.customer .avatar { font-size: 25px; }
+.customer .cname, .customer .bubble, .customer .online-customer-tag, .customer > .small { display: none; }
+.customer .bar { position: absolute; bottom: -1px; width: 26px; height: 3px; }
+.customer .mood { font-size: 12px; top: -2px; right: -4px; }
+.customer .vip-tag { font-size: 6px; padding: 1px 3px; }
+.customer-empty { text-align: left; padding: 7px 10px; font-size: 11px; background: transparent; }
+.counter { flex: 0 0 auto; width: auto; min-height: 0; max-height: none; overflow: visible; margin: 0 8px; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.counter-title { display: none; }
+.counter:has(.local-barista) { display: flex; flex-direction: column; gap: 7px; }
+.counter:has(.local-barista) > .order-panel { order: 1; }
+.counter:has(.local-barista) > .assistant-slot { order: 2; }
+.counter:has(.local-barista) .order-head, .counter:has(.local-barista) .order-ings, .counter:has(.local-barista) > .counter-idle { display: none; }
+.counter:has(.local-barista) .order-panel .btn { font-size: 11px; min-height: 35px; padding: 7px; }
+.barista-station { position: relative; display: grid; grid-template-columns: 31% minmax(0, 1fr) 42px; gap: 7px 5px; padding-top: 106px; }
+.guest-order { position: absolute; top: 0; left: 0; right: 0; height: 73px; display: grid; grid-template-columns: 66px 1fr; gap: 9px; align-items: center; }
+.guest-portrait { align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 45px; line-height: 1.2; background: radial-gradient(ellipse at 50% 65%, #c7d5a3 0 40%, transparent 41%); }
+.guest-portrait > span { font-size: 9px; font-weight: 900; padding: 2px 9px; background: #f8edcf; border: 1px solid #a88b60; transform: rotate(-2deg); }
+.station-ticket { position: relative; min-height: 64px; justify-content: center; border: 2px solid #a48b71; border-radius: 13px; padding: 5px 9px; background: #fff9ed; }
+.station-ticket::before { content: ''; position: absolute; top: 24px; left: -7px; width: 10px; height: 10px; background: #fff9ed; border-left: 2px solid #a48b71; border-bottom: 2px solid #a48b71; transform: rotate(45deg); }
+.station-ticket > span { font-size: 8px; letter-spacing: .04em; }
+.station-ticket b { font-size: 11px; line-height: 1.4; }
+.station-ticket small { font-size: 9px; }
+.guest-patience { height: 5px; border: 1px solid #a18d70; border-radius: 6px; margin-top: 4px; overflow: hidden; }
+.guest-patience i { display: block; height: 100%; background: #b6c88e; }
+.station-guide { position: absolute; left: 24%; right: 4%; top: 78px; padding: 5px 8px; background: #719cba; color: #fffdf4; text-align: center; border-radius: 5px; font-size: 10px; font-weight: 800; }
+.station-heading { display: none; }
+.tea-menu { grid-column: 2; grid-row: 1; gap: 3px; padding: 4px 3px; background: #ebdcad; border: 1px solid #988261; border-bottom: 4px solid #ad8f65; border-radius: 3px; align-items: stretch; scrollbar-width: thin; }
+.tea-choice { position: relative; flex: 0 0 44px; min-height: 91px; padding: 6px 2px 4px; gap: 4px; border: 1px solid #ab9576; border-radius: 12px 12px 7px 7px; background: #fff9e8; }
+.tea-choice b { white-space: normal; font-size: 8px; line-height: 1.15; }
+.tea-choice small { font-size: 7px; }
+.tea-choice.active { border: 2px solid #779397; background: #f1eed6; }
+.tea-vessel { display: block; position: relative; width: 27px; height: 40px; border: 1px solid #927e60; border-radius: 4px 4px 10px 10px; background: linear-gradient(90deg, #fff8, #fff0 40%, #fff8), linear-gradient(to top, var(--tea-color) 0 62%, #f9f2d8 63%); box-shadow: inset 3px 0 #fff5; }
+.tea-vessel::before { content: ''; position: absolute; left: -3px; right: -3px; height: 7px; top: -5px; border-radius: 50%; background: #eadbc0; border: 1px solid #927e60; }
+.tea-vessel i { position: absolute; top: 5px; right: -7px; width: 8px; height: 18px; border: 2px solid #927e60; border-left: 0; border-radius: 0 6px 6px 0; }
+.counter-machine { grid-column: 3; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; border: 2px solid #8e7f68; border-radius: 6px 6px 3px 3px; background: linear-gradient(#d6c4a4 0 50%, #a08f75 50% 55%, #d8c9ae 55%); box-shadow: 2px 3px #80694e44; }
+.counter-machine > span { font-size: 6px; font-weight: 900; }
+.counter-machine > i { font-style: normal; font-size: 22px; }
+.counter-machine > b { font-size: 8px; color: #719673; background: #e2d4b0; border: 1px solid #8e7f68; padding: 2px 5px; }
+.counter-machine > div { width: 21px; height: 19px; border-radius: 0 0 8px 8px; background: #faf3df; border: 2px solid #8e7f68; box-shadow: 0 4px #8e7f68; }
+.station-options { display: contents; }
+.size-picker { grid-column: 1; grid-row: 1; display: flex; flex-direction: row; min-width: 0; flex-wrap: wrap; gap: 3px; align-content: end; }
+.size-picker > .station-label { width: 100%; text-align: center; font-size: 8px; }
+.cup-size { position: relative; flex: 1; min-width: 0; height: 73px; padding: 3px; flex-direction: column; justify-content: end; gap: 2px; border: 1px solid #b19b77; border-radius: 4px; background: #efe0bc; }
+.cup-size::before { content: ''; width: 16px; height: 28px; border: 1px solid #9d8b72; border-radius: 2px 2px 6px 6px; background: repeating-linear-gradient(0deg, #b6aa90 0 1px, #fff8e2 1px 4px); }
+.cup-size[data-size='L']::before { height: 38px; }
+.cup-size[data-size='S']::before { height: 22px; }
+.cup-size b { width: auto; height: auto; background: none; color: #625a3c; font-size: 11px; }
+.cup-size span, .cup-size small { display: none; }
+.cup-size.active { border: 2px solid #86a47e; background: #edf0d3; }
+.topping-picker { grid-column: 2 / 4; grid-row: 2; gap: 3px; }
+.topping-picker > .station-label { text-align: center; font-size: 8px; }
+.topping-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; overflow: visible; padding: 4px; border: 2px solid #aa8b69; background: #e6d3ae; border-radius: 6px; }
+.topping-choice { position: relative; width: auto; height: 66px; border: 2px solid #b4aa96; border-radius: 7px; padding: 3px; background: linear-gradient(135deg, #fffae9, #e0ddc9); box-shadow: inset 0 0 0 2px #fff8, 0 1px 2px #6e533d33; }
+.topping-fill { display: grid; place-items: center; width: 100%; flex: 1; font-size: 20px; border-radius: 4px; background: #efe4c9; }
+.topping-fill.topping-pearl { color: transparent; background: radial-gradient(circle, #41342b 0 3px, #716052 3px 4px, transparent 4.5px) 0 0 / 9px 9px, #b79c7d; }
+.topping-fill.topping-snowpearl { background: radial-gradient(circle, #fffef0 0 3px, #ccc7b7 3px 4px, transparent 4.5px) 0 0 / 10px 10px, #e2ddcc; }
+.topping-choice b { max-width: 100%; font-size: 7px; }
+.topping-choice small { position: absolute; right: 2px; top: -4px; padding: 1px 3px; border: 1px solid #a18b69; border-radius: 8px; background: #fff4d8; color: #735d43; font-size: 7px; }
+.topping-choice.active { border-color: #7d9975; background: #dfe9c8; }
+.topping-choice.locked { opacity: .65; }
+.topping-choice:disabled:not(.locked) { opacity: .65; }
+.brew-bench { position: relative; grid-column: 1; grid-row: 2; display: flex; flex-direction: column; min-height: 0; align-items: center; justify-content: center; padding: 24px 5px 9px; gap: 8px; border: 2px solid #b9986d; border-radius: 6px; background: repeating-linear-gradient(92deg, #e9cfa233 0 12px, #d8b78333 12px 13px), #f7e4ba; }
+.bench-label { position: absolute; top: 0; left: 0; right: 0; text-align: center; font-weight: 900; font-size: 9px; padding: 3px; background: #dcc196; border-bottom: 1px solid #b9986d; color: #695038; }
+.cup-stage { width: 78px; height: 119px; flex: 0 0 auto; place-items: end center; }
+.cup-glass { width: 54px; height: 81px; border: 2px solid #96886e; border-top: 1px solid #96886e; border-radius: 7px 7px 14px 14px; background: linear-gradient(90deg, #fff7, #fff1 40%, #fff6); box-shadow: inset 4px 0 #fff5, 0 4px 0 #bba17866; transform: perspective(160px) rotateX(-7deg); }
+.cup-glass::after { content: ''; position: absolute; inset: 5px 5px auto; height: 5px; border: 1px solid #afa18a; border-radius: 50%; }
+.cup-liquid, .cup-ready .cup-liquid { min-height: 0; background: linear-gradient(90deg, #fff4, #fff0), var(--tea-color, #c9a77e); transition: height .12s linear; border-top: 3px solid #fff6; }
+.cup-liquid[style='height:0%'] { border-top: 0; }
+.cup-ingredients { position: absolute; bottom: 9px; left: 4px; right: 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 1px; line-height: 1; letter-spacing: 0; font-size: 10px; }
+.cup-bit { font-style: normal; text-shadow: none; }
+.cup-size-label { background: #fffa; color: #826e50; right: 4px; bottom: 2px; }
+.cup-build-copy { text-align: center; gap: 3px; }
+.cup-build-copy b { font-size: 9px; }
+.cup-build-copy small { font-size: 8px; }
+.cup-build-copy .ing-chip { font-size: 7px; margin: 1px; }
+.pour-pitcher { position: absolute; width: 32px; height: 31px; border: 2px solid #8d7960; border-radius: 5px 5px 9px 9px; background: linear-gradient(90deg, #fff8, #fff0), var(--tea-color); top: 0; left: 3px; transform: rotate(38deg); opacity: 0; }
+.pour-pitcher::after { content: ''; position: absolute; right: -10px; top: 3px; width: 10px; height: 15px; border: 2px solid #8d7960; border-radius: 0 7px 7px 0; }
+.pour-stream { top: 26px; left: 35px; width: 5px; height: 47px; background: linear-gradient(90deg, #fff5, #fff0), var(--tea-color); border-radius: 4px; transform-origin: top; font-size: 0; }
+.cup-stage.pouring .pour-pitcher { opacity: 1; animation: pitcherRock 1.2s ease-in-out infinite; }
+.cup-stage.pouring .pour-stream { opacity: 1; animation: continuousPour .45s linear infinite alternate; }
+.cup-stage.pouring .cup-glass { animation: none; }
+.tea-splash { position: absolute; width: 22px; height: 7px; left: 28px; top: 69px; border: 2px dotted var(--tea-color); border-radius: 50%; opacity: 0; }
+.pouring .tea-splash { animation: liquidSplash .5s ease-out infinite; }
+.cup-lid { width: 58px; height: 10px; top: 33px; border: 2px solid #9a8a70; border-radius: 50%; background: #f2e8d2; font-size: 0; }
+.cup-stage.cup-ready:not(.sealing) .cup-lid { opacity: 0; }
+.topping-drop { position: absolute; top: 5px; left: 28px; height: 95px; width: 26px; z-index: 4; pointer-events: none; }
+.topping-drop span { position: absolute; font-size: 12px; animation: toppingFall .6s cubic-bezier(.4,0,.85,.6) both; }
+.topping-drop span:nth-child(2) { left: 12px; animation-delay: .07s; }
+.topping-drop span:nth-child(3) { left: 5px; animation-delay: .12s; }
+.station-controls, .station-warning, .timing-label, .timing, .seal-button, .assistant-slot { grid-column: 1 / -1; }
+.station-controls .btn, .seal-button { font-size: 11px; min-height: 35px; padding: 7px; }
+.timing { height: 22px; }
+.timing-label { font-size: 10px; }
+.shop-actions { flex: 0 0 auto; margin-top: 10px; padding: 0 9px; gap: 4px; }
+.shop-actions .btn { min-width: 65px; font-size: 10px; padding: 6px; min-height: 30px; }
+.day-progress { font-size: 9px; }
+.karin-area { position: absolute; top: 38px; right: 9px; }
+.karin-btn { width: 35px; height: 35px; }
+.karin-btn .karin-body { font-size: 25px; }
+.karin-btn .karin-label { display: none; }
+.buffs { top: 36px; left: auto; right: 48px; }
+.buff { font-size: 8px; padding: 2px 4px; }
+.hud { background: #fcf4e7; border-color: #dca8a0; }
+.hud-row { font-size: 11px; gap: 4px; }
+.hud .pill { padding: 4px 6px; }
+.hud-icon-btn { width: 27px; height: 27px; flex-basis: 27px; font-size: 12px; }
+.hud-level { font-size: 9px; }
+.bottom-nav { background: #f4e6ca; border-color: #b89571; }
+@keyframes pitcherRock { 50% { transform: translateY(1px) rotate(44deg); } }
+@keyframes continuousPour { from { transform: scaleX(.8); } to { transform: scaleX(1.15); } }
+@keyframes liquidSplash { from { opacity: .8; transform: scale(.4); } to { opacity: 0; transform: scale(1.4) translateY(-3px); } }
+@keyframes toppingFall { 0% { transform: translateY(-8px) rotate(-25deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(90px) rotate(80deg); opacity: 0; } }
+@media (min-width: 600px) { .barista-station { grid-template-columns: 27% minmax(0, 1fr) 65px; gap: 10px; padding-top: 125px; } .guest-order { height: 88px; grid-template-columns: 88px 1fr; } .guest-portrait { font-size: 58px; } .station-ticket b { font-size: 14px; } .station-guide { top: 94px; font-size: 12px; } .tea-choice { flex-basis: 59px; min-height: 105px; } .tea-choice b { font-size: 10px; } .topping-choice { height: 80px; } .topping-choice b { font-size: 9px; } .cup-stage { transform: scale(1.25); margin: 15px 0; } .size-picker .cup-size { height: 83px; } }
+@media (max-width: 340px) { .barista-station { grid-template-columns: 30% minmax(0, 1fr) 34px; gap: 5px 3px; } .tea-choice { flex-basis: 36px; } .topping-choice { height: 58px; } .topping-choice b { font-size: 6px; } .cup-stage { transform: scale(.85); margin: -8px 0; } .station-guide { font-size: 8px; } .station-ticket b { font-size: 10px; } }
+@media (prefers-reduced-motion: reduce) { .cup-stage *, .topping-drop span { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } .pouring .pour-stream, .pouring .pour-pitcher { opacity: 1; } }

@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="css/menu.css" />
 <link rel="stylesheet" href="css/start-menu.css" />
 <link rel="stylesheet" href="css/farm.css" />
+<link rel="stylesheet" href="css/tea-counter.css" />
 </head>
 <body>
 <div id="app" class="app">
@@ -53,6 +54,7 @@
   // direct local opening; hosted sites load the current module source instead.
   if (location.protocol === 'file:') {
     document.write('<script src="js/bundle.js"><\/script>');
+    document.write('<script src="js/barista-standalone.js"><\/script>');
     document.write('<script src="js/farm-standalone.js"><\/script>');
     document.write('<script src="js/start-menu-standalone.js"><\/script>');
   } else {

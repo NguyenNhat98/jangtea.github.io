@@ -1,5 +1,5 @@
 /** Công thức, pha chế, mini-game timing và phục vụ. */
-import { RECIPES, RECIPE_MAP, QUALITY, DAY_CONFIG } from '../config.js';
+import { RECIPES, RECIPE_MAP, INGREDIENT_MAP, DELIVERY_DESTINATIONS, QUALITY, DAY_CONFIG } from '../config.js';
 import { gameState, markDirty } from '../state.js';
 import { emit, EVENTS } from '../events.js';
 import { hasIngredients, missingIngredients, useIngredients } from './inventorySystem.js';
@@ -59,7 +59,7 @@ function findCustomer(id) {
 /**
  * Bắt đầu pha cho khách đang chọn. @returns {string|null} lỗi
  */
-export function startPreparation(customerId) {
+export function startPreparation(customerId, options = {}) {
   const shop = gameState.shop;
   if (shop.preparation) return 'Đang pha dở một ly';
   const customer = findCustomer(customerId);
@@ -68,8 +68,12 @@ export function startPreparation(customerId) {
   if (customer.handledBy === 'assistant') return 'Trợ lý đang pha cho khách này';
   const recipe = getRecipe(customer.order.recipeId);
   if (!recipe) return 'Công thức không tồn tại';
-  if (!hasIngredients(recipe.ingredients)) return 'Thiếu nguyên liệu';
-  useIngredients(recipe.ingredients);
+  const ingredients = { ...recipe.ingredients };
+  for (const id of options.toppings || []) {
+    if (INGREDIENT_MAP[id]) ingredients[id] = (ingredients[id] || 0) + 1;
+  }
+  if (!hasIngredients(ingredients)) return 'Thiếu nguyên liệu';
+  useIngredients(ingredients);
   customer.state = 'preparing';
   customer.handledBy = 'player';
   shop.preparation = {
@@ -80,6 +84,9 @@ export function startPreparation(customerId) {
     phase: 'brewing',
     marker: 0,
     markerDir: 1,
+    ingredients,
+    toppings: (options.toppings || []).filter((id) => INGREDIENT_MAP[id]),
+    cupSize: ['S', 'M', 'L'].includes(options.cupSize) ? options.cupSize : 'M',
   };
   markDirty('counter', 'customers');
   emit(EVENTS.PREP_STARTED, { customer, recipe });
@@ -113,7 +120,7 @@ export function serveCurrent() {
   const prep = gameState.shop.preparation;
   if (!prep || prep.phase !== 'timing') return null;
   const quality = qualityForMarker(prep.marker);
-  const result = completeServe(prep.customerId, prep.recipeId, quality, 'player');
+  const result = completeServe(prep.customerId, prep.recipeId, quality, 'player', { cupSize: prep.cupSize });
   gameState.shop.preparation = null;
   markDirty('counter', 'customers');
   return result;
@@ -123,20 +130,37 @@ export function serveCurrent() {
  * Hoàn tất phục vụ: tính tiền, rating, xp, cập nhật khách.
  * @returns {{quality:string, money:number, customer:object, recipe:object, tip:number}|null}
  */
-export function completeServe(customerId, recipeId, quality, by) {
+export function completeServe(customerId, recipeId, quality, by, options = {}) {
   const customer = findCustomer(customerId);
   const recipe = getRecipe(recipeId);
   const q = QUALITY[quality] || QUALITY.OK;
   if (!recipe) return null;
   const shop = gameState.shop;
   const qty = customer?.order?.quantity || 1;
+  const cupSize = ['S', 'M', 'L'].includes(options.cupSize) ? options.cupSize : 'M';
+  const sizeMultiplier = cupSize === 'L' ? 1.25 : cupSize === 'S' ? 0.9 : 1;
+  const isOnline = customer?.order?.channel === 'online';
   let money = 0;
   let tip = 0;
+  let onlineOrder = null;
   if (q.mul > 0) {
-    const base = recipe.price * qty * q.mul * (customer?.vip ? customer.tipMul : 1);
-    money = addMoney(base, 'serve', true);
-    if (chance(getAdditive('tipChance')) || (quality === 'PERFECT' && chance(0.25))) {
-      tip = addMoney(Math.round(recipe.price * 0.3), 'tip', false);
+    const base = recipe.price * qty * q.mul * (customer?.vip ? customer.tipMul : 1) * sizeMultiplier;
+    if (isOnline) {
+      const destination = DELIVERY_DESTINATIONS.find((d) => d.id === customer.order.destination) || DELIVERY_DESTINATIONS[0];
+      const delivery = gameState.delivery;
+      delivery.preparedOrders ||= [];
+      onlineOrder = {
+        id: delivery.nextId++, customer: customer.name, recipeId, destination: destination.id,
+        duration: customer.order.deliveryDuration || destination.duration,
+        reward: Math.max(1000, Math.round((customer.order.deliveryReward || destination.reward) * qty * sizeMultiplier * q.mul * (customer?.vip ? customer.tipMul : 1))),
+        status: 'prepared', progress: 0, quality, cupSize,
+      };
+      delivery.preparedOrders.push(onlineOrder);
+    } else {
+      money = addMoney(base, 'serve', true);
+      if (chance(getAdditive('tipChance')) || (quality === 'PERFECT' && chance(0.25))) {
+        tip = addMoney(Math.round(recipe.price * 0.3 * sizeMultiplier), 'tip', false);
+      }
     }
     gameState.recipes[recipeId].made += 1;
     recordUse('recipes', recipeId);
@@ -161,9 +185,10 @@ export function completeServe(customerId, recipeId, quality, by) {
       customer.satisfaction = 'FAILED';
     }
   }
-  const result = { quality, money, tip, customer, recipe, by };
+  const result = { quality, money, tip, customer, recipe, by, onlineOrder, cupSize };
   emit(EVENTS.PREP_RESULT, result);
   if (q.mul > 0) emit(EVENTS.CUSTOMER_SERVED, result);
+  if (onlineOrder) markDirty('nav');
   markDirty('customers', 'counter', 'hud', 'actions');
   requestSave();
   return result;
@@ -225,7 +250,7 @@ function updateAssistant(dt) {
   }
   if (!shop.isOpen) return;
   const candidate = shop.customers.find(
-    (c) => c.state === 'waiting' && c.id !== shop.selectedCustomerId && c.id !== shop.preparation?.customerId && hasIngredients(getRecipe(c.order.recipeId)?.ingredients || { none: 1 }),
+    (c) => c.state === 'waiting' && c.order?.channel !== 'online' && c.id !== shop.selectedCustomerId && c.id !== shop.preparation?.customerId && hasIngredients(getRecipe(c.order.recipeId)?.ingredients || { none: 1 }),
   );
   if (!candidate) return;
   const recipe = getRecipe(candidate.order.recipeId);

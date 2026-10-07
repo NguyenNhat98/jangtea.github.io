@@ -1,5 +1,5 @@
 /** Sinh order cho khách dựa trên công thức đã mở và thời tiết. */
-import { WEATHERS, SPECIAL_REQUESTS, CUSTOMER_CONFIG } from '../config.js';
+import { WEATHERS, SPECIAL_REQUESTS, CUSTOMER_CONFIG, DELIVERY_DESTINATIONS } from '../config.js';
 import { gameState } from '../state.js';
 import { unlockedRecipes } from './recipeSystem.js';
 import { hasIngredients } from './inventorySystem.js';
@@ -24,7 +24,17 @@ export function generateOrder() {
   const recipeId = weightedPick(weights) || recipes[0]?.id;
   const quantity = gameState.level >= 3 && chance(0.15) ? 2 : 1;
   const specialRequest = chance(CUSTOMER_CONFIG.specialRequestChance) ? pick(SPECIAL_REQUESTS).id : null;
-  return { recipeId, quantity, specialRequest };
+  const cupSize = pick(['S', 'M', 'M', 'L']);
+  const online = gameState.level >= 3 && chance(0.2);
+  const destination = online ? pick(DELIVERY_DESTINATIONS) : null;
+  return {
+    recipeId, quantity, specialRequest,
+    channel: online ? 'online' : 'counter',
+    cupSize,
+    destination: destination?.id || null,
+    deliveryDuration: destination?.duration || 0,
+    deliveryReward: destination?.reward || 0,
+  };
 }
 
 export function specialRequestName(id) {

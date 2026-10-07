@@ -46,7 +46,7 @@ export function createInitialState() {
     upgrades: { counter: 0, sign: 0, decor: 0, seats: 0, storage: 0, vehicle: 0, assistant: 0 },
     inventory,
     recipes,
-    delivery: { vehicles: DELIVERY_CONFIG.baseVehicles, activeOrders: [], availableOrders: [], nextId: 1 },
+    delivery: { vehicles: DELIVERY_CONFIG.baseVehicles, activeOrders: [], availableOrders: [], preparedOrders: [], nextId: 1 },
     branches: [],
     collection: { ingredients: {}, recipes: {} },
     buffs: {},
