@@ -57,7 +57,8 @@ export function spawnCustomer(force = false) {
   };
   shop.customers.push(customer);
   shop.spawnedToday += 1;
-  markDirty('customers', 'actions');
+  if (!getSelectedCustomer()) shop.selectedCustomerId = customer.id;
+  markDirty('customers', 'actions', 'counter');
   emit(EVENTS.CUSTOMER_SPAWNED, customer);
   return customer;
 }
@@ -85,7 +86,10 @@ export function selectCustomer(id) {
 
 export function getSelectedCustomer() {
   const id = gameState.shop.selectedCustomerId;
-  return gameState.shop.customers.find((c) => c.id === id && c.state !== 'leaving') || null;
+  const eligible = c => (c.state === 'waiting' || c.state === 'preparing') && c.handledBy !== 'assistant';
+  const customer = gameState.shop.customers.find(c => c.id === id && eligible(c)) || gameState.shop.customers.find(eligible) || null;
+  gameState.shop.selectedCustomerId = customer?.id ?? null;
+  return customer;
 }
 
 /** Cộng kiên nhẫn cho toàn bộ khách đang chờ (Karin). */

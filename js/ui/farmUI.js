@@ -2,7 +2,7 @@
 import { gameState } from '../state.js';
 import { openModal } from './modalUI.js';
 import { html, esc, formatMoney } from '../utils.js';
-import { plant, water, fertilize, treat, harvest, buyLand, buyBuilding } from '../systems/farmSystem.js';
+import { plant, water, fertilize, treat, harvest, buyLand, buyBuilding, farmAction } from '../systems/farmSystem.js';
 import { isFeatureUnlocked } from '../systems/economySystem.js';
 import { toast } from './toastUI.js';
 import { on, EVENTS } from '../events.js';
@@ -45,6 +45,8 @@ function render(body) {
       ${selectedPlot !== null && !farm.plots[selectedPlot] ? renderSeedTray(selectedPlot) : ''}
       ${selectedPlot !== null && farm.plots[selectedPlot] ? renderPlantActions(selectedPlot, farm.plots[selectedPlot]) : ''}
       ${renderFarmUpgrades(farm)}
+      <section class="farm-selection"><h3>Vật tư chăm sóc</h3><div class="farm-actions">${[['water', '💧 Nước', FARM_CONFIG.waterCost], ['fertilizer', '🧺 Phân bón', FARM_CONFIG.fertilizerCost], ['pesticide', '🐞 Thuốc sâu', FARM_CONFIG.pesticideCost]].map(([id, name, cost]) => `<button class="btn btn-soft" data-farm-action="supply:${id}">+1 ${name} · ${formatMoney(cost)}</button>`).join('')}</div></section>
+      ${renderBuildings(farm)}
     </div>`;
 
   body.querySelectorAll('[data-plot]').forEach((button) => button.addEventListener('click', () => {
@@ -74,6 +76,22 @@ function render(body) {
     const message = buyBuilding(button.dataset.building);
     if (message) toast(message, 'error'); else render(body);
   }));
+  body.querySelectorAll('[data-farm-action]').forEach(button => button.addEventListener('click', () => {
+    const message = farmAction(button.dataset.farmAction);
+    if (message) toast(message, 'error'); else { toast('Đã hoàn tất thao tác nông trại', 'success', 1600); render(body); }
+  }));
+}
+
+function renderBuildings(farm) {
+  const a = farm.livestock;
+  const btn = (action, label) => `<button class="btn btn-soft" data-farm-action="${action}">${label}</button>`;
+  return `<section class="farm-buildings"><h3>Công trình đang hoạt động</h3>
+    ${farm.buildings.coop ? `<article class="farm-selection"><h3>🐔 Chuồng gà · ${a.chickens}/6 con</h3><p>${a.eggs} trứng · Thức ăn còn ${a.feedDays} ngày</p><p class="muted">Gà được cho ăn sẽ đẻ mỗi con 1 trứng khi sang ngày. Trứng bán 2.500đ/quả.</p><div class="farm-actions">${btn('chicken', 'Mua gà · 12.000đ')}${btn('feed', `Cho ăn 3 ngày · ${formatMoney(a.chickens * 1000)}`)}${btn('eggs', `Thu & bán ${a.eggs} trứng`)}</div></article>` : ''}
+    ${farm.buildings.pond ? `<article class="farm-selection"><h3>🐟 Ao cá · ${a.fish} con</h3><p>Cá lớn ${a.fishAge}/3 ngày · Thức ăn còn ${a.fishFeedDays} ngày</p><p class="muted">Thả 5 cá giống, cho ăn rồi chờ 3 ngày. Câu từng con nhận 3.500–6.000đ; kéo lưới bán cả lứa 4.000đ/con.</p><div class="farm-actions">${btn('stockFish', 'Thả 5 cá · 12.000đ')}${btn('fishFeed', 'Cho ăn 3 ngày · 2.000đ')}${btn('fish', '🎣 Câu 1 cá')}${btn('net', '🕸️ Thu cả lứa')}</div></article>` : ''}
+    ${farm.buildings.flowerGarden ? '<article class="farm-selection"><h3>🌷 Vườn hoa</h3><p>Bướm ghé thường xuyên hơn, thụ phấn giúp cây tăng sản lượng.</p></article>' : ''}
+    ${farm.buildings.beehive ? `<article class="farm-selection"><h3>🍯 Tổ ong</h3><p>Tích lũy ${farm.honeyStock || 0}/20 lọ · +1 mỗi ngày</p>${btn('honey', 'Thu mật ong vào kho')}</article>` : ''}
+    ${!Object.values(farm.buildings).some(Boolean) ? '<p class="muted">Xây chuồng gà hoặc ao nước ở phần mở rộng để bắt đầu chăn nuôi.</p>' : ''}
+  </section>`;
 }
 
 function renderSeedTray(index) {

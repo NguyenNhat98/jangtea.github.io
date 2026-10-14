@@ -3,7 +3,7 @@
  */
 export const DEBUG = true;
 export const SAVE_KEY = 'dreamTeaSave';
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 export const AUTOSAVE_INTERVAL = 30;
 export const OFFLINE_MAX_SECONDS = 8 * 3600;
 export const DAYS_PER_SEASON = 7;
@@ -33,13 +33,22 @@ export const RARITY = {
 };
 
 export const INGREDIENTS = [
+  ...['S', 'M', 'L'].map((size, i) => ({ id: `cup${size}`, name: `Ly ${size}`, icon: '🥤', cost: 500 + i * 250, maxStock: 50, rarity: 'common', unlockLevel: 1, category: 'tools', desc: `Ly cỡ ${size}, dùng một ly cho mỗi phần trà.` })),
+  ...[
+    ['whitePearl', 'Trân châu trắng', '⚪', 4000],
+    ['pearlString', 'Trân châu sợi', '🍜', 4000],
+    ['poppingPearl', 'Củ năng hạt nổ', '🟠', 4500],
+    ['coconutJelly', 'Thạch dừa', '🥥', 3500],
+    ['coffeeJelly', 'Thạch cà phê', '☕', 4000],
+    ['cheese', 'Phô mai', '🧀', 5000],
+  ].map(([id, name, icon, cost]) => ({ id, name, icon, cost, maxStock: 30, rarity: 'uncommon', unlockLevel: 1, category: 'toppings', desc: 'Topping thêm vào ly trà theo sở thích.' })),
   { id: 'tea', name: 'Trà', icon: '🍵', cost: 2000, maxStock: 30, rarity: 'common', unlockLevel: 1, desc: 'Lá trà thơm, nền của mọi thức uống.' },
   { id: 'milk', name: 'Sữa', icon: '🥛', cost: 3000, maxStock: 25, rarity: 'common', unlockLevel: 1, desc: 'Sữa tươi béo ngậy.' },
   { id: 'sugar', name: 'Đường', icon: '🍬', cost: 1000, maxStock: 40, rarity: 'common', unlockLevel: 1, desc: 'Ngọt ngào vừa đủ.' },
   { id: 'ice', name: 'Đá', icon: '🧊', cost: 500, maxStock: 40, rarity: 'common', unlockLevel: 1, desc: 'Mát lạnh cho ngày nóng.' },
   { id: 'lemon', name: 'Chanh', icon: '🍋', cost: 2500, maxStock: 25, rarity: 'common', unlockLevel: 1, desc: 'Chanh tươi chua dịu.' },
   { id: 'peach', name: 'Đào', icon: '🍑', cost: 4000, maxStock: 20, rarity: 'uncommon', unlockLevel: 1, desc: 'Đào ngâm thơm lừng.' },
-  { id: 'pearl', name: 'Trân châu', icon: '⚫', cost: 3500, maxStock: 30, rarity: 'common', unlockLevel: 2, desc: 'Trân châu dai dai, ai cũng mê.' },
+  { id: 'pearl', name: 'Trân châu đen', icon: '⚫', cost: 3500, maxStock: 30, rarity: 'common', unlockLevel: 1, category: 'toppings', desc: 'Trân châu dai dai, ai cũng mê.' },
   { id: 'lychee', name: 'Vải', icon: '🍒', cost: 4500, maxStock: 20, rarity: 'uncommon', unlockLevel: 3, desc: 'Vải thiều mọng nước.' },
   { id: 'matcha', name: 'Matcha', icon: '🍃', cost: 6000, maxStock: 15, rarity: 'rare', unlockLevel: 3, desc: 'Bột trà xanh hảo hạng.' },
   { id: 'fruit', name: 'Trái cây', icon: '🍓', cost: 5000, maxStock: 20, rarity: 'uncommon', unlockLevel: 4, desc: 'Hỗn hợp trái cây theo mùa.' },
@@ -63,6 +72,7 @@ export const RECIPES = [
   { id: 'matchaLatte', name: 'Matcha latte', icon: '🍵', price: 40000, preparationTime: 4.5, temp: 'hot', unlockLevel: 3, rarity: 'rare', ingredients: { matcha: 1, milk: 1, sugar: 1 }, desc: 'Vị trà xanh đậm đà.' },
   { id: 'lycheeTea', name: 'Trà vải', icon: '🍒', price: 32000, preparationTime: 3.5, temp: 'cold', unlockLevel: 3, rarity: 'uncommon', ingredients: { tea: 1, lychee: 2, sugar: 1, ice: 1 }, desc: 'Ngọt thanh hương vải.' },
   { id: 'fruitTea', name: 'Trà trái cây', icon: '🍓', price: 38000, preparationTime: 4, temp: 'cold', unlockLevel: 4, rarity: 'uncommon', ingredients: { tea: 1, fruit: 2, sugar: 1, ice: 1 }, desc: 'Đầy ắp trái cây tươi.' },
+  { id: 'gingerTea', name: 'Trà gừng', icon: '🫚', price: 30000, preparationTime: 3, temp: 'hot', unlockLevel: 4, rarity: 'uncommon', ingredients: { tea: 1, ginger: 1, sugar: 1 }, desc: 'Trà ấm với gừng tươi.' },
   { id: 'honeyTea', name: 'Trà mật ong', icon: '🍯', price: 28000, preparationTime: 3, temp: 'hot', unlockLevel: 5, rarity: 'rare', ingredients: { tea: 1, honey: 1 }, desc: 'Dịu họng, ấm lòng.' },
   { id: 'matchaPearl', name: 'Matcha trân châu', icon: '🥤', price: 50000, preparationTime: 5, temp: 'cold', unlockLevel: 6, rarity: 'rare', ingredients: { matcha: 1, milk: 1, pearl: 2, ice: 1 }, desc: 'Kết hợp hoàn hảo.' },
   { id: 'roseMilkTea', name: 'Trà sữa hoa hồng', icon: '🌹', price: 48000, preparationTime: 5, temp: 'cold', unlockLevel: 7, rarity: 'epic', ingredients: { tea: 1, milk: 1, rose: 1, sugar: 1, ice: 1 }, desc: 'Thơm ngát, sang trọng.' },

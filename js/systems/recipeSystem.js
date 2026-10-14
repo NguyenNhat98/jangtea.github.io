@@ -10,6 +10,19 @@ import { chance } from '../utils.js';
 import { requestSave } from '../save.js';
 
 const TIMING_SPEED = 1.1; // chu kỳ marker chạy hết thanh (giây)
+export const FLAVOR_IDS = ['lemon', 'peach', 'ginger', 'lychee'];
+export function orderIngredients(customer, cupSize = customer.order.cupSize || 'M', toppings = []) {
+  const ingredients = { ...getRecipe(customer.order.recipeId).ingredients };
+  for (const id of new Set(toppings)) {
+    if (INGREDIENT_MAP[id] && !ingredients[id]) ingredients[id] = 1;
+  }
+  if (customer.order.specialRequest === 'noIce') delete ingredients.ice;
+  if (customer.order.specialRequest === 'moreIce') ingredients.ice = (ingredients.ice || 0) + 1;
+  if (customer.order.specialRequest === 'extraPearl') ingredients.pearl = (ingredients.pearl || 0) + 1;
+  ingredients[`cup${cupSize}`] = 1;
+  const quantity = customer.order.quantity || 1;
+  return Object.fromEntries(Object.entries(ingredients).map(([id, count]) => [id, count * quantity]));
+}
 
 export function getRecipe(id) {
   return RECIPE_MAP[id] || null;
@@ -68,10 +81,13 @@ export function startPreparation(customerId, options = {}) {
   if (customer.handledBy === 'assistant') return 'Trợ lý đang pha cho khách này';
   const recipe = getRecipe(customer.order.recipeId);
   if (!recipe) return 'Công thức không tồn tại';
-  const ingredients = { ...recipe.ingredients };
-  for (const id of options.toppings || []) {
-    if (INGREDIENT_MAP[id]) ingredients[id] = (ingredients[id] || 0) + 1;
-  }
+  const cupSize = options.cupSize || customer.order.cupSize || 'M';
+  if (!['S', 'M', 'L'].includes(cupSize)) return 'Hãy chọn cỡ ly';
+  if (cupSize !== (customer.order.cupSize || 'M')) return 'Cỡ ly chưa đúng order';
+  if (options.recipeId && options.recipeId !== recipe.id) return 'Bình trà chưa đúng order';
+  const requiredFlavors = FLAVOR_IDS.filter(id => recipe.ingredients[id]);
+  if (requiredFlavors.some(id => !(options.toppings || []).includes(id))) return 'Chọn hương vị khách gọi trước khi rót trà';
+  const ingredients = orderIngredients(customer, cupSize, options.toppings);
   if (!hasIngredients(ingredients)) return 'Thiếu nguyên liệu';
   useIngredients(ingredients);
   customer.state = 'preparing';
@@ -86,7 +102,7 @@ export function startPreparation(customerId, options = {}) {
     markerDir: 1,
     ingredients,
     toppings: (options.toppings || []).filter((id) => INGREDIENT_MAP[id]),
-    cupSize: ['S', 'M', 'L'].includes(options.cupSize) ? options.cupSize : 'M',
+    cupSize,
   };
   markDirty('counter', 'customers');
   emit(EVENTS.PREP_STARTED, { customer, recipe });
@@ -242,7 +258,7 @@ function updateAssistant(dt) {
       return;
     }
     if (prep.elapsed >= prep.total) {
-      completeServe(prep.customerId, prep.recipeId, 'GOOD', 'assistant');
+      completeServe(prep.customerId, prep.recipeId, 'GOOD', 'assistant', { cupSize: c.order.cupSize || 'M' });
       shop.assistantPrep = null;
       markDirty('counter');
     }
@@ -250,11 +266,11 @@ function updateAssistant(dt) {
   }
   if (!shop.isOpen) return;
   const candidate = shop.customers.find(
-    (c) => c.state === 'waiting' && c.order?.channel !== 'online' && c.id !== shop.selectedCustomerId && c.id !== shop.preparation?.customerId && hasIngredients(getRecipe(c.order.recipeId)?.ingredients || { none: 1 }),
+    (c) => c.state === 'waiting' && c.order?.channel !== 'online' && c.id !== shop.selectedCustomerId && c.id !== shop.preparation?.customerId && getRecipe(c.order.recipeId) && hasIngredients(orderIngredients(c)),
   );
   if (!candidate) return;
   const recipe = getRecipe(candidate.order.recipeId);
-  useIngredients(recipe.ingredients);
+  useIngredients(orderIngredients(candidate));
   candidate.state = 'preparing';
   candidate.handledBy = 'assistant';
   const speed = 1.6 - 0.2 * (lvl - 1);

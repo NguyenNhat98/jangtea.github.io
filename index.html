@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#ffe9ef" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
 <title>Tiệm Trà Mơ Ước</title>
 <link rel="stylesheet" href="css/reset.css" />
 <link rel="stylesheet" href="css/variables.css" />
@@ -17,6 +21,7 @@
 <link rel="stylesheet" href="css/start-menu.css" />
 <link rel="stylesheet" href="css/farm.css" />
 <link rel="stylesheet" href="css/tea-counter.css" />
+<link rel="stylesheet" href="css/upgrade-v1.css" />
 </head>
 <body>
 <div id="app" class="app">
@@ -54,9 +59,6 @@
   // direct local opening; hosted sites load the current module source instead.
   if (location.protocol === 'file:') {
     document.write('<script src="js/bundle.js"><\/script>');
-    document.write('<script src="js/barista-standalone.js"><\/script>');
-    document.write('<script src="js/farm-standalone.js"><\/script>');
-    document.write('<script src="js/start-menu-standalone.js"><\/script>');
   } else {
     document.write('<script type="module" src="js/main.js"><\/script>');
   }

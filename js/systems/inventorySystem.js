@@ -81,6 +81,7 @@ export function addIngredient(id, qty) {
 
 /** Mua nguyên liệu. @returns {string|null} lỗi hoặc null */
 export function buyIngredient(id, qty) {
+  if (!Number.isInteger(qty) || qty <= 0) return 'Số lượng mua phải là số nguyên dương';
   const def = INGREDIENT_MAP[id];
   if (!def) return 'Nguyên liệu không tồn tại';
   if (!isUnlocked(id)) return `Cần đạt cấp ${def.unlockLevel}`;

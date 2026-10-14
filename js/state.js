@@ -3,7 +3,7 @@
  */
 import { SAVE_VERSION, INGREDIENTS, RECIPES, DELIVERY_CONFIG, FARM_CONFIG } from './config.js';
 
-const STARTING_INVENTORY = { tea: 10, milk: 6, sugar: 10, ice: 10, lemon: 5, peach: 4 };
+const STARTING_INVENTORY = { tea: 10, milk: 6, sugar: 10, ice: 10, lemon: 5, peach: 4, cupS: 10, cupM: 15, cupL: 10 };
 
 /** @returns {object} state mới cho game mới */
 export function createInitialState() {
@@ -52,10 +52,10 @@ export function createInitialState() {
     buffs: {},
     karin: { cooldown: 0, blessCount: 0 },
     achievements: {},
-    farm: { plots: Array.from({ length: FARM_CONFIG.plots }, () => null), water: 8, fertilizer: 3, pesticide: 2, lands: [], buildings: {}, animals: { butterfly: 0, dragonfly: 0, chicken: 0 }, upgrades: { greenhouse: 0, drainage: 0 } },
+    farm: { plots: Array.from({ length: FARM_CONFIG.plots }, () => null), water: 8, fertilizer: 3, pesticide: 2, lands: [], buildings: {}, livestock: { chickens: 0, feedDays: 0, eggs: 0, fish: 0, fishAge: 0, fishFeedDays: 0 }, animals: { butterfly: 0, dragonfly: 0, chicken: 0 }, upgrades: { greenhouse: 0, drainage: 0 } },
     stats: { totalEarned: 0, totalServed: 0, totalLeft: 0, perfectCount: 0, deliveriesDone: 0, minigamePlaysToday: 0, bestMinigameScore: 0 },
     tutorial: { done: false, step: 0 },
-    settings: { sound: true, music: true },
+    settings: { sound: true, music: true, theme: 'cream', vibration: 0 },
     lastPlayed: Date.now(),
   };
 }

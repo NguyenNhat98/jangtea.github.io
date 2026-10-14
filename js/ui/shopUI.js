@@ -6,7 +6,7 @@ import { listBuffs } from '../systems/buffSystem.js';
 import { getWeather } from '../systems/weatherSystem.js';
 import { playSfx } from '../systems/audioSystem.js';
 import { openUpgrades } from './upgradeUI.js';
-import { openPearlGame } from '../minigames/pearlGame.js';
+import { openMinigames } from '../minigames/menu.js';
 import { openEndDay } from './endDayUI.js';
 import { on, EVENTS } from '../events.js';
 import { bounce } from './fxUI.js';
@@ -48,7 +48,7 @@ export function renderActions() {
   });
   el.querySelector('[data-minigame]').addEventListener('click', () => {
     playSfx('click');
-    openPearlGame();
+    openMinigames();
   });
 }
 

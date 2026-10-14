@@ -9,6 +9,8 @@ import { playSfx } from '../systems/audioSystem.js';
 import { on, EVENTS } from '../events.js';
 import { sparkle, burst } from './fxUI.js';
 import { toast } from './toastUI.js';
+import { showRewardSummary } from './collectionUI.js';
+import { isClaimingReward } from '../minigames/rewards.js';
 
 const DAY_REWARD_POOL = ['pearl', 'peach', 'lemon', 'milk', 'tea', 'sugar', 'ice'];
 
@@ -33,10 +35,11 @@ export function openEndDay() {
   const m = openModal({ title: '🌙 Kết thúc ngày', body, foot, center: true, closeOnBackdrop: false, hideClose: true, id: 'endday' });
   foot.addEventListener('click', () => {
     playSfx('success');
-    if (rewardId) addIngredient(rewardId, rewardQty);
+    const received = rewardId ? addIngredient(rewardId, rewardQty) : 0;
     m.close();
     closeAllModals();
     nextDay();
+    showRewardSummary(`Đã nhận ${received} ${def?.name || 'nguyên liệu'} · Ngày ${gameState.day} bắt đầu`);
     toast(`Ngày ${gameState.day} bắt đầu! ${gameState.season === 'winter' ? '⛄' : '☀️'}`, 'info');
   });
 }
@@ -81,6 +84,6 @@ function showOffline({ seconds, amount }) {
 }
 
 export function initEndDayUI() {
-  on(EVENTS.LEVEL_UP, (data) => showLevelUp(data));
+  on(EVENTS.LEVEL_UP, (data) => { if (!isClaimingReward()) showLevelUp(data); });
   on(EVENTS.OFFLINE_PROGRESS, showOffline);
 }

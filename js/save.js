@@ -1,7 +1,7 @@
 /**
  * Lưu/tải game bằng LocalStorage. Nếu storage lỗi, game chạy memory-only.
  */
-import { SAVE_KEY, SAVE_VERSION, INGREDIENTS, RECIPES } from './config.js';
+import { SAVE_KEY, SAVE_VERSION, INGREDIENTS, RECIPES, FARM_CONFIG } from './config.js';
 import { gameState, createInitialState, replaceState, markAllDirty } from './state.js';
 import { emit, EVENTS } from './events.js';
 
@@ -75,13 +75,16 @@ function normalize(state) {
   merged.karin = { ...fresh.karin, ...(state.karin || {}) };
   merged.settings = { ...fresh.settings, ...(state.settings || {}) };
   merged.farm = { ...fresh.farm, ...(state.farm || {}), upgrades: { ...fresh.farm.upgrades, ...(state.farm?.upgrades || {}) }, animals: { ...fresh.farm.animals, ...(state.farm?.animals || {}) }, buildings: { ...fresh.farm.buildings, ...(state.farm?.buildings || {}) } };
-  merged.farm.plots = Array.isArray(state.farm?.plots) ? state.farm.plots.slice(0, fresh.farm.plots.length) : fresh.farm.plots;
-  while (merged.farm.plots.length < fresh.farm.plots.length) merged.farm.plots.push(null);
+  merged.farm.lands = [...new Set((Array.isArray(state.farm?.lands) ? state.farm.lands : []).filter(id => FARM_CONFIG.lands.some(land => land.id === id)))];
+  merged.farm.livestock = { ...fresh.farm.livestock, ...(state.farm?.livestock || {}) };
+  const plotCount = FARM_CONFIG.plots + FARM_CONFIG.lands.filter(land => merged.farm.lands.includes(land.id)).reduce((n, land) => n + land.plots, 0);
+  merged.farm.plots = Array.isArray(state.farm?.plots) ? state.farm.plots.slice() : [];
+  while (merged.farm.plots.length < plotCount) merged.farm.plots.push(null);
   merged.tutorial = { ...fresh.tutorial, ...(state.tutorial || {}) };
   merged.inventory = { ...fresh.inventory };
   for (const ing of INGREDIENTS) {
     const old = state.inventory?.[ing.id];
-    if (old) merged.inventory[ing.id] = { stock: Math.max(0, Number(old.stock) || 0), unlocked: !!old.unlocked };
+    if (old) merged.inventory[ing.id] = { stock: Math.max(0, Number(old.stock) || 0), unlocked: !!old.unlocked || ing.unlockLevel <= merged.level };
   }
   merged.recipes = { ...fresh.recipes };
   for (const r of RECIPES) {

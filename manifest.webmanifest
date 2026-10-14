@@ -1,0 +1,11 @@
+{
+  "name": "Tiệm Trà Mơ Ước",
+  "short_name": "Tiệm Trà",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff4ea",
+  "theme_color": "#fff4ea",
+  "icons": [{ "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -2,21 +2,20 @@
  * Mini-game "Ô Ăn Quan Trân Châu": chạm nhóm ≥2 trân châu cùng màu kề nhau để ăn.
  * Trạng thái: START → PLAYING → SUCCESS/FAIL → RESULT.
  */
-import { MINIGAME, INGREDIENT_MAP } from '../config.js';
+import { MINIGAME, INGREDIENT_MAP, INGREDIENTS } from '../config.js';
+import { vibrate } from '../systems/preferencesSystem.js';
+import { claimMinigameReward } from './rewards.js';
 import { gameState, markDirty } from '../state.js';
-import { emit, EVENTS } from '../events.js';
 import { html, formatMoney, randInt, chance } from '../utils.js';
 import { openModal } from '../ui/modalUI.js';
 import { toast } from '../ui/toastUI.js';
 import { playSfx } from '../systems/audioSystem.js';
-import { addMoney, spendMoney, addXp } from '../systems/economySystem.js';
-import { addIngredient } from '../systems/inventorySystem.js';
-import { discover } from '../systems/collectionSystem.js';
+import { spendMoney } from '../systems/economySystem.js';
 import { floatText, sparkle } from '../ui/fxUI.js';
 import { requestSave } from '../save.js';
 
 const SUCCESS_SCORE = 120;
-const PEARL = ['⚫', '🩷', '💚', '💛', '💙'];
+let PEARL = [];
 
 let game = null;
 
@@ -79,7 +78,7 @@ function updateHead() {
 }
 
 function tap(r, c, cellEl) {
-  if (game.state !== 'PLAYING') return;
+  if (game.state !== 'PLAYING' || game.animating) return;
   const group = groupAt(game.board, r, c);
   if (group.length < 2) {
     game.combo = 0;
@@ -91,6 +90,10 @@ function tap(r, c, cellEl) {
   const comboMul = game.combo >= 5 ? 5 : game.combo >= 3 ? 3 : game.combo >= 2 ? 2 : 1;
   const gained = group.length * group.length * comboMul;
   game.score += gained;
+  game.animating = true;
+  const activeGame = game;
+  vibrate(group.length >= 5 ? 2 : 1);
+  for (const [y, x] of group) game.body.querySelector(`[data-r="${y}"][data-c="${x}"]`)?.classList.add('mg-burst');
   for (const [y, x] of group) game.board[y][x] = -1;
   const comboEl = game.body.querySelector('[data-combo]');
   comboEl.textContent = comboMul > 1 ? `Combo x${comboMul}!` : '';
@@ -99,14 +102,14 @@ function tap(r, c, cellEl) {
   comboEl.classList.add('mg-combo');
   floatText(`+${gained}`, cellEl, 'green');
   playSfx(group.length >= 5 ? 'happy' : 'coin');
-  collapse(game.board);
-  renderBoard();
   updateHead();
-  if (!hasMoves(game.board)) {
-    game.board = newBoard();
+  game.animationTimer = setTimeout(() => {
+    if (game !== activeGame || game.state !== 'PLAYING') return;
+    collapse(game.board);
     renderBoard();
-    toast('Bàn mới! 🔄', 'info', 1000);
-  }
+    game.animating = false;
+    if (!hasMoves(game.board)) { game.board = newBoard(); renderBoard(); toast('Bàn mới! 🔄', 'info', 1000); }
+  }, 220);
 }
 
 function endGame() {
@@ -116,16 +119,7 @@ function endGame() {
   const money = game.score * MINIGAME.moneyPerPoint;
   const pearls = Math.floor(game.score / MINIGAME.pearlPerPoints);
   const rareDrop = game.state === 'SUCCESS' && chance(0.25) ? (gameState.level >= 5 ? 'honey' : 'matcha') : null;
-  addMoney(money, 'minigame', false);
-  if (pearls) addIngredient('pearl', pearls);
-  if (rareDrop) {
-    addIngredient(rareDrop, 1);
-    discover('ingredients', rareDrop);
-  }
-  addXp(Math.round(game.score / 4));
-  gameState.stats.bestMinigameScore = Math.max(gameState.stats.bestMinigameScore, game.score);
-  requestSave();
-  emit(EVENTS.MINIGAME_FINISHED, { score: game.score, money, pearls });
+  game.reward = { score: game.score, rareDrop };
   playSfx(game.state === 'SUCCESS' ? 'levelup' : 'sad');
   showResult(money, pearls, rareDrop);
 }
@@ -150,11 +144,13 @@ function startPlaying() {
   game.score = 0;
   game.combo = 0;
   game.timeLeft = MINIGAME.duration;
+  game.animating = false;
+  PEARL = INGREDIENTS.filter(i => !i.id.startsWith('cup')).sort(() => Math.random() - .5).slice(0, MINIGAME.colors).map(i => i.icon);
   game.body.innerHTML = `<div class="minigame" style="width:100%">
     <div class="mg-head"><span>⭐ <span data-score>0</span></span><span data-combo class="mg-combo"></span><span>⏱️ <span data-time></span></span></div>
     <div class="bar mg-timer"><span data-timer-bar style="width:100%"></span></div>
     <div class="mg-board" data-board></div>
-    <p class="muted center">Chạm nhóm ≥2 trân châu cùng màu kề nhau. Combo liên tiếp = nhân điểm! Mục tiêu ${SUCCESS_SCORE} điểm.</p></div>`;
+    <p class="muted center">Chạm nhóm ≥2 nguyên liệu giống nhau. Điểm = số ô² × combo (tối đa ×5). Bấm ô đơn sẽ mất combo. Mục tiêu ${SUCCESS_SCORE} điểm.</p></div>`;
   renderBoard();
   updateHead();
   let last = performance.now();
@@ -181,15 +177,23 @@ export function openPearlGame() {
     <p class="muted">Ăn thật nhiều trân châu trong ${MINIGAME.duration} giây. Điểm đổi thành tiền, trân châu và đôi khi là nguyên liệu hiếm!</p>
     <p class="muted">Kỷ lục: ${gameState.stats.bestMinigameScore} điểm</p>
     <button class="btn btn-primary btn-block" data-start>${free ? '▶️ Chơi (miễn phí hôm nay)' : `▶️ Chơi (${formatMoney(MINIGAME.playCost)})`}</button></div>`);
-  const modal = openModal({ title: '🎮 Mini-game', body, id: 'minigame', onClose: () => { if (game?.timer) clearInterval(game.timer); game = null; markDirty('actions'); } });
+  const modal = openModal({ title: '🎮 Mini-game', body, id: 'minigame', closeOnBackdrop: false, onClose: () => {
+    const reward = game?.reward;
+    if (game?.timer) clearInterval(game.timer);
+    if (game?.animationTimer) clearTimeout(game.animationTimer);
+    game = null; markDirty('actions');
+    if (reward) claimMinigameReward(reward.score, reward.rareDrop);
+  } });
   game = { modal, body: modal.body, state: 'START', timer: null };
   body.querySelector('[data-start]').addEventListener('click', () => {
-    if (!free && !spendMoney(MINIGAME.playCost, 'minigame')) {
+    const availableFree = gameState.stats.minigamePlaysToday < MINIGAME.freePlaysPerDay;
+    if (!availableFree && !spendMoney(MINIGAME.playCost, 'minigame')) {
       toast('Không đủ tiền', 'error');
       playSfx('error');
       return;
     }
     gameState.stats.minigamePlaysToday += 1;
+    requestSave();
     playSfx('success');
     startPlaying();
   });

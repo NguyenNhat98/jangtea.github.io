@@ -1,9 +1,9 @@
-﻿/** Main-screen barista station: recipe, cup size, toppings, brewing, sealing and handoff. */
+/** Main-screen barista station: recipe, cup size, toppings, brewing, sealing and handoff. */
 import { gameState, markDirty } from '../state.js';
 import { INGREDIENTS, INGREDIENT_MAP, RECIPES, RECIPE_MAP, DELIVERY_DESTINATIONS, QUALITY } from '../config.js';
 import { esc, formatMoney, $ } from '../utils.js';
 import { getSelectedCustomer } from '../systems/customerSystem.js';
-import { startPreparation, serveCurrent, cancelPreparation, qualityForMarker } from '../systems/recipeSystem.js';
+import { startPreparation, serveCurrent, cancelPreparation, qualityForMarker, FLAVOR_IDS } from '../systems/recipeSystem.js';
 import { getStock } from '../systems/inventorySystem.js';
 import { specialRequestName } from '../systems/orderSystem.js';
 import { getUpgradeLevel } from '../systems/economySystem.js';
@@ -13,10 +13,10 @@ import { floatText, coinFly, hearts, shake, sparkle } from './fxUI.js';
 import { openInventory } from './inventoryUI.js';
 import { openDelivery } from './deliveryUI.js';
 
-const TOPPING_IDS = new Set(['pearl', 'lychee', 'fruit', 'honey', 'rose', 'mint', 'ginger', 'chrysanthemum', 'jasmine', 'snowpearl', 'lemon', 'peach']);
+const TOPPING_IDS = new Set(['pearl', 'lychee', 'fruit', 'honey', 'rose', 'mint', 'ginger', 'chrysanthemum', 'jasmine', 'snowpearl', 'lemon', 'peach', 'whitePearl', 'pearlString', 'poppingPearl', 'coconutJelly', 'coffeeJelly', 'cheese']);
 let benchCustomerId = null;
 let selectedRecipeId = null;
-let selectedCupSize = 'M';
+let selectedCupSize = null;
 let selectedToppings = new Set();
 let sealing = false;
 let droppingTopping = null;
@@ -36,7 +36,7 @@ function syncWorkbench(customer) {
   if (benchCustomerId !== id) {
     benchCustomerId = id;
     selectedRecipeId = customer?.order?.recipeId || null;
-    selectedCupSize = customer?.order?.cupSize || 'M';
+    selectedCupSize = null;
     selectedToppings = new Set();
     sealing = false;
   }
@@ -44,18 +44,19 @@ function syncWorkbench(customer) {
 }
 
 function renderWorkbench(customer, recipe, prep) {
-  const recipes = RECIPES;
+  const grouped = new Set(['lemonTea', 'peachTea', 'gingerTea', 'lycheeTea', 'hotTea']);
+  const recipes = [{ id: 'teaBase', name: 'Bình trà', unlockLevel: 1 }, ...RECIPES.filter(r => !grouped.has(r.id))];
   const recipeCards = recipes.map((item) => {
-    const locked = !gameState.recipes[item.id]?.unlocked;
-    return `<button class="tea-choice${selectedRecipeId === item.id ? ' active' : ''}${locked ? ' locked' : ''}" data-tea="${item.id}" title="${esc(item.name)}${locked ? ' · Mở ở cấp ' + item.unlockLevel : ''}" ${prep || locked ? 'disabled' : ''}><span class="tea-vessel" style="--tea-color:${drinkColor(item.id)}"><i></i></span><b>${esc(item.name)}</b>${locked ? '<small>🔒 ' + item.unlockLevel + '</small>' : ''}</button>`;
+    const locked = item.id !== 'teaBase' && !gameState.recipes[item.id]?.unlocked;
+    return `<button class="tea-choice${(selectedRecipeId === item.id || (item.id === 'teaBase' && grouped.has(selectedRecipeId))) ? ' active' : ''}${locked ? ' locked' : ''}" data-tea="${item.id}" title="${esc(item.name)}${locked ? ' · Mở ở cấp ' + item.unlockLevel : ''}" ${prep || locked ? 'disabled' : ''}><span class="tea-vessel" style="--tea-color:${drinkColor(item.id)}"><i></i></span><b>${esc(item.name)}</b>${locked ? '<small>🔒 ' + item.unlockLevel + '</small>' : ''}</button>`;
   }).join('');
-  const toppings = INGREDIENTS.filter((item) => TOPPING_IDS.has(item.id)).map((item) => {
+  const toppings = INGREDIENTS.filter((item) => TOPPING_IDS.has(item.id)).sort((a, b) => Number(!!recipe?.ingredients[b.id]) - Number(!!recipe?.ingredients[a.id]) || Number(getStock(b.id) > 0) - Number(getStock(a.id) > 0)).map((item) => {
     const stock = getStock(item.id);
     const active = selectedToppings.has(item.id);
     const locked = !gameState.inventory[item.id]?.unlocked;
-    return `<button class="topping-choice${active ? ' active' : ''}${locked ? ' locked' : ''}" data-topping="${item.id}" title="${esc(item.name)}${locked ? ' · Mở ở cấp ' + item.unlockLevel : ' · Bấm để thêm hoặc bỏ'}" ${prep || locked || stock <= (recipe?.ingredients[item.id] || 0) ? 'disabled' : ''}><span class="topping-fill topping-${item.id}">${locked ? '🔒' : item.icon}</span><b>${esc(item.name)}</b><small>${locked ? 'Cấp ' + item.unlockLevel : '×' + stock}</small></button>`;
+    return `<button class="topping-choice${active ? ' active' : ''}${locked ? ' locked' : ''}" data-topping="${item.id}" title="${esc(item.name)}${locked ? ' · Mở ở cấp ' + item.unlockLevel : ' · Bấm để thêm hoặc bỏ'}" ${prep || locked || stock <= 0 ? 'disabled' : ''}><span class="topping-fill topping-${item.id}">${locked ? '🔒' : item.icon}</span><b>${esc(item.name)}</b><small>${locked ? 'Cấp ' + item.unlockLevel : '×' + stock}</small></button>`;
   }).join('');
-  const sizeChoices = [['S', 'Nhỏ', '×0.9'], ['M', 'Vừa', 'Giá gốc'], ['L', 'Lớn', '+25%']].map(([id, label, price]) => `<button class="cup-size${selectedCupSize === id ? ' active' : ''}" data-size="${id}" ${prep ? 'disabled' : ''}><b>${id}</b><span>${label}</span><small>${price}</small></button>`).join('');
+  const sizeChoices = [['S', 'Nhỏ', '×0.9'], ['M', 'Vừa', 'Giá gốc'], ['L', 'Lớn', '+25%']].map(([id, label, price]) => `<button class="cup-size${selectedCupSize === id ? ' active' : ''}" data-size="${id}" ${prep ? 'disabled' : ''}><b>${id}</b><span>${label}</span><small>×${getStock(`cup${id}`)}</small></button>`).join('');
   const selectedRecipe = RECIPE_MAP[selectedRecipeId];
   const mismatch = customer && selectedRecipeId !== customer.order.recipeId;
   const visibleToppings = new Set([...selectedToppings, ...(prep ? Object.keys(prep.ingredients || {}).filter((id) => TOPPING_IDS.has(id)) : [])]);
@@ -63,17 +64,17 @@ function renderWorkbench(customer, recipe, prep) {
   const progress = prep?.phase === 'brewing' ? Math.min(88, prep.elapsed / prep.total * 88) : prep?.phase === 'timing' ? 88 : 0;
   return `<section class="barista-station" aria-label="Trạm pha chế">
     <div class="station-heading"><div><span class="station-kicker">TRẠM BARISTA</span><b>${customer ? 'Pha theo order của khách' : 'Chọn món trên menu'}</b></div><span class="station-status">${prep?.phase === 'brewing' ? '🫖 Đang rót' : prep?.phase === 'timing' ? '🧢 Đóng nắp' : '● Sẵn sàng'}</span></div>
-    <div class="tea-menu" aria-label="Chọn loại trà">${recipeCards || '<span class="muted">Chưa mở khóa món nào.</span>'}</div><div class="counter-machine" aria-hidden="true"><span>TIỆM TRÀ</span><i>🧋</i><b>● ●</b><div></div></div>
+    <div class="tea-menu" aria-label="Chọn loại trà">${recipeCards || '<span class="muted">Chưa mở khóa món nào.</span>'}</div><button class="counter-machine" data-machine aria-label="Máy đóng nắp và giao khách" ${prep?.phase === 'timing' && !sealing ? '' : 'disabled'}><span>TIỆM TRÀ</span><i>🧋</i><b>● ●</b><div></div></button>
     <div class="station-options"><div class="size-picker"><span class="station-label">CỠ LY</span>${sizeChoices}</div><div class="topping-picker"><span class="station-label">TOPPING</span><div class="topping-list">${toppings || '<small class="muted">Chưa có topping trong kho</small>'}</div></div></div>
     <div class="brew-bench"><span class="bench-label">PHA LY</span><div class="cup-stage ${prep?.phase === 'brewing' ? 'pouring' : ''} ${prep?.phase === 'timing' ? 'cup-ready' : ''} ${sealing ? 'sealing' : ''}" style="--tea-color:${drinkColor(selectedRecipeId)}">
       <div class="pour-pitcher" aria-hidden="true"></div><div class="cup-lid"></div><div class="cup-glass"><div class="cup-liquid" data-liquid style="height:${progress}%"></div><span class="cup-ingredients">${toppingsList}</span><span class="cup-size-label">${prep?.cupSize || selectedCupSize}</span></div><div class="pour-stream"></div><div class="tea-splash" aria-hidden="true"></div>${droppingTopping ? `<div class="topping-drop" aria-hidden="true"><span>${INGREDIENT_MAP[droppingTopping]?.icon || ''}</span><span>${INGREDIENT_MAP[droppingTopping]?.icon || ''}</span><span>${INGREDIENT_MAP[droppingTopping]?.icon || ''}</span></div>` : ''}
     </div><div class="cup-build-copy"><b>${prep?.phase === 'brewing' ? 'Đang rót trà vào ly…' : prep?.phase === 'timing' ? 'Ly đã pha xong!' : selectedRecipe?.name || 'Ly trà của bạn'}</b><small>Đường & đá tự động</small></div></div>
-    <div class="guest-order"><div class="guest-portrait" aria-hidden="true">${customer?.avatar || '👩🏻'}<span>QUẦY TRÀ</span></div>${customer ? `<div class="station-ticket ${customer.order.channel === 'online' ? 'online-ticket' : ''}"><span>${customer.order.channel === 'online' ? '📱 ĐƠN ONLINE' : esc(customer.name)}</span><b>Cho mình ${customer.order.quantity || 1} ly ${esc(recipe?.name || '')} size ${customer.order.cupSize || 'M'} nhé!</b><small>${customer.order.destination ? 'Giao đến: ' + esc(DELIVERY_DESTINATIONS.find((destination) => destination.id === customer.order.destination)?.name || customer.order.destination) : ''}${customer.order.specialRequest ? ' · ' + esc(specialRequestName(customer.order.specialRequest)) : 'Cảm ơn bạn!'}<div class="guest-patience"><i data-guest-patience style="width:${Math.max(0, customer.patience / customer.maxPatience * 100)}%"></i></div></small></div>` : '<div class="station-ticket"><span>TIỆM TRÀ MƠ ƯỚC</span><b>Mời bạn mở cửa và chọn khách để nhận món.</b><small>Một ly trà ngon, một ngày dịu dàng.</small></div>'}</div>
-    <div class="station-guide" role="status">${prep?.phase === 'brewing' ? 'Đang rót trà · chờ ly đầy nhé' : prep?.phase === 'timing' ? 'Canh vạch giữa để đóng nắp và giao khách' : 'Chọn trà, cỡ ly và topping · sau đó rót trà'}</div>
+    <div class="guest-order"><div class="guest-portrait" aria-hidden="true">${customer?.avatar || '👩🏻'}<span>QUẦY TRÀ</span></div>${customer ? `<div class="station-ticket ${customer.order.channel === 'online' ? 'online-ticket' : ''}"><span>${customer.order.channel === 'online' ? '📱 ĐƠN ONLINE' : esc(customer.name)}</span><b>Cho mình ${customer.order.quantity || 1} ly ${esc(recipe?.name || '')} size ${customer.order.cupSize || 'M'} nhé!</b><small>${customer.order.destination ? 'Giao đến: ' + esc(DELIVERY_DESTINATIONS.find((destination) => destination.id === customer.order.destination)?.name || customer.order.destination) : ''}${customer.order.specialRequest ? ' · ' + esc(specialRequestName(customer.order.specialRequest)) : 'Cảm ơn bạn!'}<div class="guest-patience"><i data-guest-patience style="width:${Math.max(0, customer.patience / customer.maxPatience * 100)}%"></i></div></small></div>` : '<div class="station-ticket"><span>TIỆM TRÀ MƠ ƯỚC</span><b>Mở cửa để đón khách. Order sẽ tự hiển thị ở đây.</b><small>Một ly trà ngon, một ngày dịu dàng.</small></div>'}</div>
+    <div class="station-guide" role="status">${prep?.phase === 'brewing' ? 'Đang rót trà · chờ ly đầy nhé' : prep?.phase === 'timing' ? 'Canh vạch giữa để đóng nắp và giao khách' : '1. Chọn ly → 2. Thêm hương vị → 3. Bấm bình trà → 4. Bấm máy đóng nắp'}</div>
     ${mismatch ? `<p class="station-warning">Khách đang gọi ${esc(recipe?.name || 'món khác')}. Chọn đúng món để pha nhé.</p>` : ''}
-    ${customer && !prep ? `<div class="station-controls"><button class="btn btn-primary btn-block" data-prep ${mismatch || customer.handledBy === 'assistant' ? 'disabled' : ''}>🫖 Rót trà vào ly</button>${Object.entries(recipe?.ingredients || {}).some(([id, qty]) => getStock(id) < qty) ? '<button class="btn btn-warm" data-buy>🛒 Mua nguyên liệu</button>' : ''}</div>` : ''}
+    ${customer && !prep ? `<div class="station-controls"><button class="btn btn-primary btn-block" data-prep ${!selectedCupSize || mismatch || customer.handledBy === 'assistant' ? 'disabled' : ''}>🫖 Rót trà vào ly</button>${Object.entries(recipe?.ingredients || {}).some(([id, qty]) => getStock(id) < qty) ? '<button class="btn btn-warm" data-buy>🛒 Mua nguyên liệu</button>' : ''}</div>` : ''}
     ${prep?.phase === 'brewing' ? `<div class="station-controls"><div class="bar prep-bar"><span data-prep-bar style="width:${progress}%"></span></div><button class="btn btn-sm btn-soft" data-cancel>Hủy ly</button></div>` : ''}
-    ${prep?.phase === 'timing' ? `<div class="timing-label" data-timing-label>Ly đã đầy · Đóng nắp để chuyển cho khách</div><div class="timing" aria-hidden="true"><div class="marker" data-marker></div></div><button class="btn btn-warm btn-block seal-button" data-seal ${sealing ? 'disabled' : ''}>${sealing ? '🧢 Đang đóng nắp…' : '🧢 Đóng nắp & giao khách'}</button>` : ''}
+    ${prep?.phase === 'timing' ? `<div class="seal-controls"><div class="timing-panel"><div class="timing-label" data-timing-label>Ly đã đầy · Đóng nắp để chuyển cho khách</div><div class="timing" aria-hidden="true"><div class="marker" data-marker></div></div></div><button class="btn btn-warm seal-button" data-seal ${sealing ? 'disabled' : ''}>${sealing ? '🧢 Đang đóng nắp…' : '🧢 Đóng nắp & giao khách'}</button></div>` : ''}
     ${assistantBlock()}
   </section>`;
 }
@@ -90,9 +91,10 @@ export function renderCounter() {
   el.innerHTML = `<div class="counter-title"><span>🥤 QUẦY PHA CHẾ</span><span>${prep ? 'Đang pha…' : customer ? 'Order mới' : 'Mời chọn món'}</span></div>${renderWorkbench(customer, recipe, prep)}`;
 
   el.querySelectorAll('[data-tea]').forEach((button) => button.addEventListener('click', () => {
-    selectedRecipeId = button.dataset.tea;
+    selectedRecipeId = button.dataset.tea === 'teaBase' ? (FLAVOR_IDS.some(id => recipe?.ingredients[id]) || customer?.order.recipeId === 'hotTea' ? customer.order.recipeId : 'hotTea') : button.dataset.tea;
     playSfx('click');
     renderCounter();
+    if (customer) pourTea();
   }));
   el.querySelectorAll('[data-size]').forEach((button) => button.addEventListener('click', () => {
     selectedCupSize = button.dataset.size;
@@ -111,20 +113,24 @@ export function renderCounter() {
       document.querySelector('.topping-drop')?.remove();
     }, 700);
   }));
-  el.querySelector('[data-prep]')?.addEventListener('click', (event) => {
-    const err = startPreparation(customer.id, { cupSize: selectedCupSize, toppings: [...selectedToppings] });
-    if (err) { toast(err, 'error'); shake(event.currentTarget); playSfx('error'); }
+  function pourTea() {
+    if (!customer) return;
+    if (!selectedCupSize) return toast('Bấm chọn cỡ ly trước khi rót trà', 'info');
+    const err = startPreparation(customer.id, { recipeId: selectedRecipeId, cupSize: selectedCupSize, toppings: [...selectedToppings] });
+    if (err) { toast(err, 'error'); playSfx('error'); }
     else { droppingTopping = null; playSfx('pour'); }
-  });
+  }
+  el.querySelector('[data-prep]')?.addEventListener('click', pourTea);
   el.querySelector('[data-buy]')?.addEventListener('click', () => { playSfx('click'); openInventory(); });
   el.querySelector('[data-cancel]')?.addEventListener('click', () => { cancelPreparation(); selectedToppings.clear(); playSfx('click'); });
-  el.querySelector('[data-seal]')?.addEventListener('click', (event) => {
+  el.querySelector('[data-seal]')?.addEventListener('click', () => el.querySelector('[data-machine]')?.click());
+  el.querySelector('[data-machine]')?.addEventListener('click', (event) => {
     if (sealing) return;
     sealing = true;
     event.currentTarget.disabled = true;
     el.querySelector('.cup-stage')?.classList.add('sealing');
     el.querySelector('.cup-lid')?.classList.add('lid-drop');
-    event.currentTarget.textContent = '🧢 Đang đóng nắp…';
+    el.querySelector('[data-seal]').textContent = '🧢 Đang đóng nắp…';
     playSfx('lid');
     const sealedPrep = gameState.shop.preparation;
     const sealedMarker = sealedPrep?.marker;

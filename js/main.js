@@ -22,8 +22,9 @@ import { initAchievementSystem, checkAchievements } from './systems/achievementS
 import { applyOfflineProgress } from './systems/offlineSystem.js';
 import { initAudioSystem } from './systems/audioSystem.js';
 import { updateFarm } from './systems/farmSystem.js';
+import { initPreferences } from './systems/preferencesSystem.js';
 
-import { initModalUI } from './ui/modalUI.js';
+import { initModalUI, isModalOpen } from './ui/modalUI.js';
 import { initToastUI, toast } from './ui/toastUI.js';
 import { renderHud } from './ui/hudUI.js';
 import { renderCustomers, updatePatienceBars } from './ui/customerUI.js';
@@ -71,8 +72,9 @@ function showFriendlyErrorNotice() {
 
 function registerUpdates() {
   registerUpdate(updateBuffs);
-  registerUpdate(updateCustomerSystem);
-  registerUpdate(updateRecipeSystem);
+  const paused = () => isModalOpen('minigame') || isModalOpen('block-game') || isModalOpen('minigame-menu') || !!document.querySelector('.tutorial-box');
+  registerUpdate(dt => { if (!paused()) updateCustomerSystem(dt); });
+  registerUpdate(dt => { if (!paused()) updateRecipeSystem(dt); });
   registerUpdate(updateKarin);
   registerUpdate(updateDelivery);
   registerUpdate(updateBranches);
@@ -155,6 +157,7 @@ function boot() {
   initModalUI();
   initToastUI();
   initAudioSystem();
+  initPreferences();
   initCollectionSystem();
   initAchievementSystem();
   initDeliverySystem();

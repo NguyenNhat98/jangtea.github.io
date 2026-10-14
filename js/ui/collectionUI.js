@@ -1,10 +1,8 @@
 /** Bộ sưu tập + modal "Phát hiện mới". */
-import { RARITY } from '../config.js';
 import { html, esc } from '../utils.js';
 import { listCollection, collectionProgress } from '../systems/collectionSystem.js';
-import { openModal, queueModal } from './modalUI.js';
+import { openModal } from './modalUI.js';
 import { on, EVENTS } from '../events.js';
-import { sparkle } from './fxUI.js';
 
 function renderTab(body, category) {
   const items = listCollection(category);
@@ -32,18 +30,21 @@ export function openCollection() {
 }
 
 export function initCollectionUI() {
-  on(EVENTS.DISCOVERY, ({ category, item }) => {
-    queueModal((done) => {
-      const body = html(`<div class="col center">
-        <div class="summary-emoji">${item.icon}</div>
-        <div class="summary-big">${esc(item.name)}</div>
-        <span class="rarity-${item.rarity}"><span class="rarity">${RARITY[item.rarity].name}</span></span>
-        <p class="muted">${esc(item.desc)}</p>
-        <p class="muted">${category === 'recipes' ? 'Công thức' : 'Nguyên liệu'} mới trong bộ sưu tập</p></div>`);
-      const foot = html('<button class="btn btn-primary btn-block">Tuyệt! ✨</button>');
-      const m = openModal({ title: '✨ Phát hiện mới!', body, foot, center: true, onClose: done });
-      foot.addEventListener('click', m.close);
-      setTimeout(() => sparkle(body.querySelector('.summary-emoji'), 10), 150);
-    });
-  });
+  // Discoveries remain in the collection; gameplay and reward screens stay usable.
+  on(EVENTS.DISCOVERY, ({ category, item }) => pendingDiscoveries.set(`${category}:${item.id}`, item));
+  on(EVENTS.GAME_RESET, () => pendingDiscoveries.clear());
+}
+
+const pendingDiscoveries = new Map();
+export function takeDiscoveries() {
+  const items = [...pendingDiscoveries.values()];
+  pendingDiscoveries.clear();
+  return items;
+}
+export function showRewardSummary(message) {
+  const discoveries = takeDiscoveries();
+  const body = html(`<div class="col"><p class="bold">${esc(message)}</p>${discoveries.length ? `<h3>✨ Phát hiện mới (${discoveries.length})</h3><div class="grid-auto">${discoveries.map(item => `<div class="item-card"><span class="ico">${item.icon}</span><b>${esc(item.name)}</b></div>`).join('')}</div>` : ''}</div>`);
+  const foot = html('<button class="btn btn-primary btn-block">Tuyệt! ✨</button>');
+  const modal = openModal({ title: '🎁 Tổng hợp phần thưởng', body, foot, center: true, id: 'reward-summary' });
+  foot.addEventListener('click', modal.close);
 }
